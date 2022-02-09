@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "addresses",
+  "info": {
+    "singularName": "address",
+    "pluralName": "addresses",
+    "displayName": "address",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "city": {
+      "type": "string",
+      "required": true
+    },
+    "address_1": {
+      "type": "text",
+      "required": true
+    },
+    "zip_code": {
+      "type": "string",
+      "required": true
+    },
+    "country": {
+      "type": "string",
+      "required": true
+    },
+    "county": {
+      "type": "string",
+      "required": true
+    },
+    "address_type": {
+      "type": "enumeration",
+      "enum": [
+        "billing",
+        "shipping"
+      ],
+      "required": true
+    }
+  }
+}

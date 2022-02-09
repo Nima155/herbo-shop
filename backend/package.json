@@ -1,0 +1,35 @@
+{
+  "name": "backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A Strapi application",
+  "scripts": {
+    "develop": "strapi develop",
+    "start": "strapi start",
+    "build": "strapi build",
+    "strapi": "strapi"
+  },
+  "dependencies": {
+    "@strapi/plugin-graphql": "^4.0.6",
+    "@strapi/plugin-i18n": "4.0.6",
+    "@strapi/plugin-users-permissions": "4.0.6",
+    "@strapi/provider-email-nodemailer": "^4.0.7",
+    "@strapi/strapi": "4.0.6",
+    "pg": "8.6.0",
+    "stripe": "^8.201.0"
+  },
+  "author": {
+    "name": "Nima Shadab"
+  },
+  "strapi": {
+    "uuid": "f97727f2-b579-49be-8400-e6e9ea5d414a"
+  },
+  "engines": {
+    "node": ">=12.x.x <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^17.0.16"
+  }
+}
