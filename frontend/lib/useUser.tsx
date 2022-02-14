@@ -11,19 +11,24 @@ export default function useUser({
 } = {}) {
 	const queryClient = useQueryClient()
 
-	const { data: user } = useQuery('user_stats', async () => {
-		const data_1 = await request(
-			process.env.BACKEND_URL_GRAPHQL as string,
-			userInfo
-		)
-
-		return data_1
-	})
+	const { data: user } = useQuery(
+		'user_stats',
+		async () => {
+			const data_1 = await request(
+				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL as string,
+				userInfo
+			)
+			return data_1
+		},
+		{
+			staleTime: 10000,
+		}
+	)
 
 	const loginUser = useMutation(
-		async (credentials) => {
+		async (credentials: { identifier: string; password: string }) => {
 			return await request(
-				process.env.BACKEND_URL_GRAPHQL as string,
+				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL as string,
 				login,
 				credentials
 			)

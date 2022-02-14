@@ -1,4 +1,6 @@
 "use strict";
+const CSRF = require("koa-csrf");
+const csrfProtection = new CSRF();
 
 module.exports = {
   /**
@@ -9,19 +11,39 @@ module.exports = {
    */
   register({ strapi }) {
     const extensionService = strapi.plugin("graphql").service("extension");
-    extensionService.use({
+    extensionService.use(({ nexus }) => ({
       resolversConfig: {
-        "Query.products": {
+        "Query.addresses": {
           middlewares: [
             async (next, parent, args, context, info) => {
-              console.log("hey tehre");
+              context.koaContext.request.method = "GET";
+              csrfProtection(context.koaContext, () => {});
+              // call the next resolver
+              // context.koaContext.csrf to access csrf token
               const res = await next(parent, args, context, info);
               return res;
             },
           ],
         },
       },
-    });
+      types: [
+        nexus.extendType({
+          type: "UsersPermissionsMe",
+          definition(t) {
+            // here define fields you need
+            t.list.field("addresses", { type: "Address" });
+          },
+        }),
+      ],
+    }));
+
+    strapi.service("plugin::users-permissions.user").fetchAuthenticatedUser = (
+      id
+    ) => {
+      return strapi
+        .query("plugin::users-permissions.user")
+        .findOne({ where: { id }, populate: ["role", "addresses"] });
+    };
   },
 
   /**

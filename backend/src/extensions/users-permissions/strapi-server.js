@@ -19,13 +19,12 @@ const emailRegExp =
 module.exports = (plugin) => {
   const {
     validateCallbackBody,
-    validateRegisterBody,
-    validateSendEmailConfirmationBody,
+    // validateRegisterBody,
+    // validateSendEmailConfirmationBody,
   } = require("./validation/auth");
   plugin.services.jwt = ({ strapi }) => ({
     getToken(ctx) {
       let token;
-
       if (
         ctx.request &&
         ctx.request.header &&
@@ -191,14 +190,7 @@ module.exports = (plugin) => {
       });
     }
   };
-
-  // plugin.policies[newPolicy] = (ctx) => {};
-
-  // plugin.routes.push({
-  //   method: "GET",
-  //   path: "/route-path",
-  //   handler: "controller.action",
-  // });
+  plugin.routes["content-api"].routes = []; // disabling users-permission routes on the rest api side
 
   return plugin;
 };

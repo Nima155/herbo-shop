@@ -7,7 +7,7 @@ export default styled.button`
 	&:after {
 		content: '';
 		width: 100%;
-		transform: scale3d(0, 0, 0);
+		transform: scale3d(0, 1, 0);
 		position: absolute;
 		bottom: 0px;
 		left: 0px;
