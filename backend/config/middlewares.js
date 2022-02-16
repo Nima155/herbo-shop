@@ -1,7 +1,23 @@
 module.exports = [
   "strapi::errors",
   "strapi::security",
-  "strapi::cors",
+
+  {
+    // custom resolve to find a package or a path
+    name: "strapi::cors",
+    config: {
+      enabled: true,
+      credentials: true,
+      headers: [
+        "Content-Type",
+        "Authorization",
+        "Origin",
+        "Accept",
+        "x-xsrf-token",
+      ],
+      origin: ["http://localhost:3000", "http://localhost:1337"],
+    },
+  },
   "strapi::poweredBy",
   "strapi::logger",
   "strapi::query",

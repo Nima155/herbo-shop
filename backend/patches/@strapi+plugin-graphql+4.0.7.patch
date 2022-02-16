@@ -1,0 +1,29 @@
+diff --git a/node_modules/@strapi/plugin-graphql/server/bootstrap.js b/node_modules/@strapi/plugin-graphql/server/bootstrap.js
+index b7f8647..de8b653 100644
+--- a/node_modules/@strapi/plugin-graphql/server/bootstrap.js
++++ b/node_modules/@strapi/plugin-graphql/server/bootstrap.js
+@@ -97,6 +97,7 @@ module.exports = async ({ strapi }) => {
+   }
+ 
+   // Link the Apollo server & the Strapi app
++  
+   strapi.server.routes([
+     {
+       method: 'ALL',
+@@ -114,7 +115,15 @@ module.exports = async ({ strapi }) => {
+         },
+ 
+         // Apollo Server
+-        server.getMiddleware({ path }),
++        
++        server.getMiddleware({ path: path,cors: {
++          origin: "http://localhost:3000",
++          maxAge: 31536000,
++          credentials: true,
++          methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
++          headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', "x-xsrf-token"],
++          keepHeadersOnError: false
++        } }),
+       ],
+       config: {
+         auth: false,

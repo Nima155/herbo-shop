@@ -21,6 +21,7 @@ export default function Login() {
 		formState: { errors },
 	} = useForm<LoginFormData>()
 	const { user, loginUser } = useUser()
+	// console.log(user)
 
 	const onSubmit: SubmitHandler<LoginFormData> = ({ ident, password }) => {
 		loginUser.mutate({
@@ -81,6 +82,7 @@ export default function Login() {
 							})}
 						/>
 					</InputLabelWrapper>
+
 					<Button
 						type="submit"
 						className="bg-emerald-500 text-gray-100 hover:bg-emerald-700 focus:bg-emerald-700 transition-colors p-1 duration-150 ease-in mt-3"

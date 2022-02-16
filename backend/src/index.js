@@ -13,10 +13,9 @@ module.exports = {
     const extensionService = strapi.plugin("graphql").service("extension");
     extensionService.use(({ nexus }) => ({
       resolversConfig: {
-        "Query.addresses": {
+        "Mutation.login": {
           middlewares: [
             async (next, parent, args, context, info) => {
-              context.koaContext.request.method = "GET";
               csrfProtection(context.koaContext, () => {});
               // call the next resolver
               // context.koaContext.csrf to access csrf token
@@ -25,6 +24,9 @@ module.exports = {
             },
           ],
         },
+        "Query._csrf": {
+          auth: false,
+        },
       },
       types: [
         nexus.extendType({
@@ -32,6 +34,18 @@ module.exports = {
           definition(t) {
             // here define fields you need
             t.list.field("addresses", { type: "Address" });
+          },
+        }),
+        nexus.extendType({
+          type: "Query",
+          definition(t) {
+            t.string("_csrf", {
+              resolve: (rootz, args, ctx) => {
+                ctx.koaContext.request.method = "GET";
+                csrfProtection(ctx.koaContext, () => {});
+                return ctx.koaContext.csrf;
+              },
+            });
           },
         }),
       ],

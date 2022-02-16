@@ -16,6 +16,7 @@
     "@strapi/provider-email-nodemailer": "^4.0.7",
     "@strapi/strapi": "4.0.7",
     "koa-csrf": "^3.0.8",
+    "patch-package": "^6.4.7",
     "pg": "8.6.0",
     "stripe": "^8.201.0"
   },

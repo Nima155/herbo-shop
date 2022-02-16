@@ -157,7 +157,9 @@ module.exports = (plugin) => {
             process.env.NODE_ENV === "development"
               ? "localhost"
               : process.env.PRODUCTION_URL,
+          sameSite: "none",
         });
+        // console.log(ctx.cookies.get("token"), ctx.res);
         ctx.send({
           status: "Authenticated",
           user: await sanitizeUser(user, ctx),

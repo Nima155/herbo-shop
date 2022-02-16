@@ -18,6 +18,13 @@ module.exports = ({ env }) => ({
       },
     },
   },
+  // graphql: {
+  //   config: {
+  //     apolloServer: {
+  //       cors: true,
+  //     },
+  //   },
+  // },
 
   // ...
 });

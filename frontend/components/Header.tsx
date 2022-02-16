@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Modal from './Modal'
 import Hamburger from './Hamburger'
 import UnderlineButton from './UnderlineButton'
-import useUser from '../lib/useUser'
 import Login from './Login'
 
 export default function Header() {
