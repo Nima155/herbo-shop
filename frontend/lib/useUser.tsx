@@ -3,15 +3,9 @@ import Router from 'next/router'
 import { useMutation, useQuery, useQueryClient } from 'react-query'
 
 import queries from './graphql'
-const { userInfo, login } = queries
-import { GraphQLClient, gql, request } from 'graphql-request'
-const gqlClient = new GraphQLClient(
-	process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
-	{
-		credentials: 'include',
-		mode: 'cors',
-	}
-)
+import { authenticatedGraphQl } from './helpers'
+const { USER_INFO, LOGIN } = queries
+
 // async function main() {
 //   const endpoint = 'https://api.graph.cool/simple/v1/cixos23120m0n0173veiiwrjr'
 
@@ -20,11 +14,11 @@ export default function useUser({
 	redirectIfFound = false,
 } = {}) {
 	const queryClient = useQueryClient()
-
+	const gqlClient = authenticatedGraphQl()
 	const { data: user } = useQuery(
 		'user_stats',
 		async () => {
-			const data_1 = await gqlClient.request(userInfo)
+			const data_1 = await gqlClient.request(USER_INFO)
 
 			return data_1
 		},
@@ -35,7 +29,7 @@ export default function useUser({
 
 	const loginUser = useMutation(
 		async (credentials: { identifier: string; password: string }) => {
-			return gqlClient.request(login, credentials, {
+			return gqlClient.request(LOGIN, credentials, {
 				'x-xsrf-token': user._csrf,
 			})
 		},

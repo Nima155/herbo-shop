@@ -1,7 +1,11 @@
-import type { NextPage } from 'next'
+import request, { GraphQLClient } from 'graphql-request'
+import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
+import { dehydrate, QueryClient } from 'react-query'
 import Layout from '../components/Layout'
+import queries from '../lib/graphql'
+import { authenticatedGraphQl } from '../lib/helpers'
 
 const Home: NextPage = () => {
 	return (
@@ -15,6 +19,24 @@ const Home: NextPage = () => {
 			<main></main>
 		</div>
 	)
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+	const gqlClient = authenticatedGraphQl(context.req.cookies)
+
+	const queryClient = new QueryClient()
+	const { USER_INFO_NO_CSRF } = queries
+
+	await queryClient.prefetchQuery('user_stats', async () => {
+		const data_1 = gqlClient.request(USER_INFO_NO_CSRF)
+		return data_1
+	})
+
+	return {
+		props: {
+			dehydratedState: dehydrate(queryClient),
+		},
+	}
 }
 
 export default Home
