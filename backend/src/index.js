@@ -40,10 +40,25 @@ module.exports = {
           type: "Query",
           definition(t) {
             t.string("_csrf", {
-              resolve: (rootz, args, ctx) => {
+              resolve: (_rootz, _args, ctx) => {
                 ctx.koaContext.request.method = "GET";
                 csrfProtection(ctx.koaContext, () => {});
                 return ctx.koaContext.csrf;
+              },
+            });
+          },
+        }),
+        nexus.extendType({
+          type: "Mutation",
+          definition(t) {
+            t.string("logout", {
+              resolve(_rootz, _args, ctx) {
+                console.log(ctx.koaContext.cookies.get("token"));
+                ctx.koaContext.cookies.set("token", "", {
+                  expires: new Date(0),
+                });
+                // ctx.cookies.set("token");
+                return "successful logout";
               },
             });
           },

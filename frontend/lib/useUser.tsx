@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from 'react-query'
 
 import queries from './graphql'
 import { authenticatedGraphQl } from './helpers'
-const { USER_INFO, LOGIN } = queries
+
+const { USER_INFO, LOGIN, CSRF } = queries
 
 // async function main() {
 //   const endpoint = 'https://api.graph.cool/simple/v1/cixos23120m0n0173veiiwrjr'
@@ -23,14 +24,16 @@ export default function useUser({
 			return data_1
 		},
 		{
-			staleTime: 10000,
+			staleTime: Infinity,
 		}
 	)
 
 	const loginUser = useMutation(
 		async (credentials: { identifier: string; password: string }) => {
+			const { _csrf } = await gqlClient.request(CSRF)
+
 			return gqlClient.request(LOGIN, credentials, {
-				'x-xsrf-token': user._csrf,
+				'x-xsrf-token': _csrf,
 			})
 		},
 		{

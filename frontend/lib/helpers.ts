@@ -1,10 +1,21 @@
 import { GraphQLClient } from 'graphql-request'
 import { NextApiRequestCookies } from 'next/dist/server/api-utils'
+export function serializeCookies(
+	cookies?: NextApiRequestCookies
+): string | null {
+	const cookieValues: string[] = Object.values(cookies || [])
+
+	return cookies
+		? Object.keys(cookies)
+				.map((k, i) => `${k}=${cookieValues[i]};`)
+				.join(' ')
+		: null
+}
 
 export function authenticatedGraphQl(
 	cookies?: NextApiRequestCookies
 ): GraphQLClient {
-	const cookieValues: string[] = Object.values(cookies || [])
+	const cookies_1 = serializeCookies(cookies)
 
 	const graphClient = new GraphQLClient(
 		process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
@@ -13,9 +24,7 @@ export function authenticatedGraphQl(
 			mode: 'cors',
 			...(cookies && {
 				headers: {
-					Cookie: Object.keys(cookies)
-						.map((k, i) => `${k}=${cookieValues[i]};`)
-						.join(' '),
+					Cookie: cookies_1!,
 				},
 			}),
 		}

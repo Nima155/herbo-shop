@@ -9,6 +9,14 @@ const nextConfig = {
 
 		return config
 	},
+	// async rewrites() {
+	// 	return [
+	// 		{
+	// 			source: '/pages/:path*',
+	// 			destination: 'http://localhost:3000/pages/:path*', // Proxy to Backend
+	// 		},
+	// 	]
+	// },
 	experimental: {
 		styledComponents: true,
 	},

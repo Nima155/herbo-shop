@@ -1,29 +1,47 @@
 import React, { useState } from 'react'
 import Logo from '../public/Logo.svg'
 import Link from 'next/link'
-import Modal from './Modal'
 import Hamburger from './Hamburger'
-import UnderlineButton from './UnderlineButton'
+import { UnderlineButton } from './UnderlinedComponents'
 import Login from './Login'
 import useUser from '../lib/useUser'
+import queries from '../lib/graphql'
+import styled from 'styled-components'
+import { Popover, Transition } from '@headlessui/react'
+import { useMutation, useQueryClient } from 'react-query'
+import { authenticatedGraphQl } from '../lib/helpers'
 
+const StyledAnchor = styled.a.attrs({
+	className: 'hover:text-emerald-700',
+})``
 export default function Header() {
 	const { user, loginUser } = useUser()
-	console.log(user)
+	const queryClient = useQueryClient()
+
+	const logoutMutation = useMutation(
+		async (event: React.MouseEvent<HTMLButtonElement>) => {
+			await authenticatedGraphQl().request(queries.LOGOUT)
+		},
+		{
+			onSuccess: () => {
+				queryClient.removeQueries('user_stats', { exact: true })
+			},
+		}
+	)
 
 	return (
 		<header>
 			{/* <Modal modalActivator={() => {}}> */}
 			<nav className="flex justify-between p-2">
 				<Link href="/" passHref>
-					<div className="transition-opacity hover:opacity-70 cursor-pointer sm:block hidden">
+					<a className="transition-opacity hover:opacity-70 cursor-pointer sm:block hidden">
 						<Logo width={82} height={40} />
-					</div>
+					</a>
 				</Link>
 				<Hamburger />
 
 				{!user?.me ? (
-					<ul className="hidden md:flex items-center">
+					<ul className="hidden sm:flex items-center">
 						<li>
 							<UnderlineButton>Register</UnderlineButton>
 						</li>
@@ -33,7 +51,40 @@ export default function Header() {
 						</li>
 					</ul>
 				) : (
-					<p>Hey {user.me.username}</p>
+					<Popover className="relative hidden sm:block">
+						<Popover.Button className="hover:text-emerald-700 transition-colors ease-linear">
+							{user.me.username}
+						</Popover.Button>
+						<Transition
+							enter="transition duration-100 ease-out"
+							enterFrom="transform scale-95 opacity-0"
+							enterTo="transform scale-100 opacity-100"
+							leave="transition duration-75 ease-out"
+							leaveFrom="transform scale-100 opacity-100"
+							leaveTo="transform scale-95 opacity-0"
+						>
+							<Popover.Panel className="absolute z-10 -left-6 p-2 overflow-hidden rounded-md border shadow-md shadow-emerald-200">
+								<div className="flex flex-col gap-2 text-sm capitalize">
+									<Link href="/current-account/update-profile" passHref>
+										<StyledAnchor>Profile</StyledAnchor>
+									</Link>
+									<Link href="/current-account/address-details" passHref>
+										<StyledAnchor>Shipping</StyledAnchor>
+									</Link>
+									<Link href="/current-account/orders" passHref>
+										<StyledAnchor>Orders</StyledAnchor>
+									</Link>
+									<button
+										className="self-start hover:text-emerald-600"
+										onClick={logoutMutation.mutate}
+									>
+										{/* logout button */}logout
+									</button>
+								</div>
+								{/* <img src="/solutions.jpg" alt="" /> */}
+							</Popover.Panel>
+						</Transition>
+					</Popover>
 				)}
 			</nav>
 

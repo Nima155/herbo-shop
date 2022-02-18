@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import UnderlineButton from './UnderlineButton'
+import { UnderlineButton } from './UnderlinedComponents'
 import Modal from './Modal'
 import Input from './Input'
 import Label from './Input/Label'
@@ -8,6 +8,7 @@ import Button from './Button'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import isEmail from 'validator/lib/isEmail'
 import useUser from '../lib/useUser'
+import MyDialog from './MyModal'
 
 type LoginFormData = {
 	ident: string
@@ -19,6 +20,7 @@ export default function Login() {
 		register,
 		handleSubmit,
 		formState: { errors },
+		setError,
 	} = useForm<LoginFormData>()
 	const { user, loginUser } = useUser()
 	// console.log(user)
@@ -30,6 +32,10 @@ export default function Login() {
 		})
 	}
 
+	if (!errors.password && loginUser.isError) {
+		setError('password', { message: 'Invalid password or username/email' })
+	}
+
 	return (
 		<div>
 			<UnderlineButton onClick={() => setModalStatus(true)}>
@@ -38,7 +44,7 @@ export default function Login() {
 			<Modal
 				modalIsOpen={modalStatus}
 				modalSetter={() => setModalStatus(false)}
-				twStyles="p-10 bg-white rounded-md"
+				twStyles="p-10 bg-white rounded-md flex justify-center mx-auto relative"
 				twVariants={{
 					hidden: {
 						y: 20,
@@ -65,6 +71,7 @@ export default function Login() {
 									validitiy: (v) => isEmail(v) || 'Invalid email format',
 								},
 							})}
+							autoComplete="off"
 						/>
 						{errors.ident && (
 							<span className="text-red-800 text-xs">
@@ -81,14 +88,23 @@ export default function Login() {
 								required: true,
 							})}
 						/>
+						{errors.password && (
+							<span className="text-red-800 text-xs">
+								{errors.password.message}
+							</span>
+						)}
 					</InputLabelWrapper>
 
 					<Button
 						type="submit"
-						className="bg-emerald-500 text-gray-100 hover:bg-emerald-700 focus:bg-emerald-700 transition-colors p-1 duration-150 ease-in mt-3"
+						className="bg-emerald-500 text-gray-100 hover:bg-emerald-700 focus:bg-emerald-700 transition-colors py-1 px-7 duration-150 ease-in mt-3 self-start "
 					>
 						Login
 					</Button>
+
+					<button className="text-xs text-gray-500 hover:text-gray-900 self-start">
+						forgot your password?
+					</button>
 				</form>
 			</Modal>
 		</div>

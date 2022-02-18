@@ -1,6 +1,8 @@
+import Link from 'next/link'
 import styled from 'styled-components'
 // import tw from 'twin.macro'
-export default styled.button`
+
+const STYLE = `
 	margin-right: 0.5rem;
 	margin-left: 0.5rem;
 	position: relative;
@@ -16,10 +18,18 @@ export default styled.button`
 		transform-origin: top left;
 		transition: transform 250ms;
 	}
-	&:hover,
-	&:focus {
+	&:hover
+	{
 		&:after {
 			transform: scale3d(1, 1, 1);
 		}
 	}
+`
+
+export const UnderlineButton = styled.button`
+	${STYLE}
+`
+
+export const UnderlineLink = styled(Link)`
+	${STYLE}
 `

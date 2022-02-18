@@ -1,10 +1,13 @@
 import login from './mutations/login'
 import userInfo from './queries/userInfo'
-import userInfoNoCSRF from './queries/userInfoNoCSRF'
+import csrf from './queries/csrf'
+import logout from './mutations/logout'
 const exports = {
+	CSRF: csrf,
 	LOGIN: login,
 	USER_INFO: userInfo,
-	USER_INFO_NO_CSRF: userInfoNoCSRF,
+
+	LOGOUT: logout,
 }
 
 export default exports

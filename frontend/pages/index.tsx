@@ -1,7 +1,6 @@
-import request, { GraphQLClient } from 'graphql-request'
+import Cookie from 'cookies'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
 import { dehydrate, QueryClient } from 'react-query'
 import Layout from '../components/Layout'
 import queries from '../lib/graphql'
@@ -25,10 +24,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	const gqlClient = authenticatedGraphQl(context.req.cookies)
 
 	const queryClient = new QueryClient()
-	const { USER_INFO_NO_CSRF } = queries
+	const { USER_INFO } = queries
 
 	await queryClient.prefetchQuery('user_stats', async () => {
-		const data_1 = gqlClient.request(USER_INFO_NO_CSRF)
+		const data_1 = gqlClient.request(USER_INFO)
 		return data_1
 	})
 
