@@ -20,11 +20,11 @@ export default function useUser({
 		'user_stats',
 		async () => {
 			const data_1 = await gqlClient.request(USER_INFO)
-
 			return data_1
 		},
 		{
 			staleTime: Infinity,
+			enabled: queryClient.getQueryData('user_stats') !== undefined,
 		}
 	)
 

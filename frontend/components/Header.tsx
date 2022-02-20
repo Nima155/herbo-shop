@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Logo from '../public/Logo.svg'
 import Link from 'next/link'
 import Hamburger from './Hamburger'
-import { UnderlineButton } from './UnderlinedComponents'
 import Login from './Login'
 import useUser from '../lib/useUser'
 import queries from '../lib/graphql'
@@ -10,6 +9,7 @@ import styled from 'styled-components'
 import { Popover, Transition } from '@headlessui/react'
 import { useMutation, useQueryClient } from 'react-query'
 import { authenticatedGraphQl } from '../lib/helpers'
+import Register from './Register'
 
 const StyledAnchor = styled.a.attrs({
 	className: 'hover:text-emerald-700',
@@ -43,7 +43,7 @@ export default function Header() {
 				{!user?.me ? (
 					<ul className="hidden sm:flex items-center">
 						<li>
-							<UnderlineButton>Register</UnderlineButton>
+							<Register />
 						</li>
 						<span className="border mr-2 ml-2 h-3/4 color bg-slate-500" />
 						<li>

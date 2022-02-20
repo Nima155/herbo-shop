@@ -1,8 +1,8 @@
-import Cookie from 'cookies'
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
 import { dehydrate, QueryClient } from 'react-query'
 import Layout from '../components/Layout'
+import LoadingDots from '../components/LoadingDots'
 import queries from '../lib/graphql'
 import { authenticatedGraphQl } from '../lib/helpers'
 
@@ -15,6 +15,7 @@ const Home: NextPage = () => {
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
 			<Layout />
+
 			<main></main>
 		</div>
 	)

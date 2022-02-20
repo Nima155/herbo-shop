@@ -1,6 +1,15 @@
 "use strict";
 const CSRF = require("koa-csrf");
 const csrfProtection = new CSRF();
+const MIDDLEWARES = [
+  async (next, parent, args, context, info) => {
+    csrfProtection(context.koaContext, () => {});
+    // call the next resolver
+    // context.koaContext.csrf to access csrf token
+    const res = await next(parent, args, context, info);
+    return res;
+  },
+];
 
 module.exports = {
   /**
@@ -14,16 +23,9 @@ module.exports = {
     extensionService.use(({ nexus }) => ({
       resolversConfig: {
         "Mutation.login": {
-          middlewares: [
-            async (next, parent, args, context, info) => {
-              csrfProtection(context.koaContext, () => {});
-              // call the next resolver
-              // context.koaContext.csrf to access csrf token
-              const res = await next(parent, args, context, info);
-              return res;
-            },
-          ],
+          middlewares: MIDDLEWARES, // CSRF check
         },
+
         "Query._csrf": {
           auth: false,
         },
@@ -53,7 +55,6 @@ module.exports = {
           definition(t) {
             t.string("logout", {
               resolve(_rootz, _args, ctx) {
-                console.log(ctx.koaContext.cookies.get("token"));
                 ctx.koaContext.cookies.set("token", "", {
                   expires: new Date(0),
                 });

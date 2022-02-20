@@ -29,16 +29,17 @@ export default function Modal({
 			className="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center"
 		>
 			<Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-
-			<motion.div
-				initial="hidden"
-				animate="visible"
-				variants={twVariants}
-				ref={elementRef}
-				className={twStyles}
-			>
-				{children}
-			</motion.div>
+			<div className="mx-2">
+				<motion.div
+					initial="hidden"
+					animate="visible"
+					variants={twVariants}
+					ref={elementRef}
+					className={twStyles}
+				>
+					{children}
+				</motion.div>
+			</div>
 		</Dialog>
 	)
 }
