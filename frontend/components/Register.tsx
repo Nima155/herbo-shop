@@ -55,12 +55,10 @@ export default function Register() {
 		},
 		{
 			onError: (e) => {
-				console.log(e?.response?.errors[0]?.message.toLowerCase())
-
 				if (e?.response?.errors[0]?.message.toLowerCase().includes('email')) {
 					setError('email', { message: e?.response?.errors[0].message })
 				} else {
-					setError('password', { message: e?.response?.errors[0].message })
+					setError('username', { message: 'Username already taken' })
 				}
 			},
 		}
@@ -102,7 +100,7 @@ export default function Register() {
 							alt="A tick indicating success"
 						/>
 						Welcome, you should now confirm your account by clicking on the link
-						in the email that we just sent!
+						in the email that we just sent you!
 					</div>
 				) : (
 					<>

@@ -1,5 +1,6 @@
 import { GraphQLClient } from 'graphql-request'
 import { NextApiRequestCookies } from 'next/dist/server/api-utils'
+import { ImageLoaderProps } from 'next/image'
 export function serializeCookies(
 	cookies?: NextApiRequestCookies
 ): string | null {
@@ -30,4 +31,12 @@ export function authenticatedGraphQl(
 		}
 	)
 	return graphClient
+}
+
+export function imageLoader(resourceLocation: ImageLoaderProps) {
+	// console.log(
+	// 	`${process.env.NEXT_PUBLIC_IMAGE_URL}/${resourceLocation.width}_${resourceLocation.src}`
+	// )
+
+	return `${process.env.NEXT_PUBLIC_IMAGE_URL}${resourceLocation.src}`
 }

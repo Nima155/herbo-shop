@@ -4,6 +4,9 @@ import csrf from './queries/csrf'
 import forgot_password from './mutations/forgot_password'
 import register from './mutations/register'
 import logout from './mutations/logout'
+import confirm_email from './mutations/confirm_email'
+import products from './queries/products'
+import reset_password from './mutations/reset_password'
 const exports = {
 	CSRF: csrf,
 	LOGIN: login,
@@ -11,6 +14,9 @@ const exports = {
 	FORGOT_PASSWORD: forgot_password,
 	LOGOUT: logout,
 	REGISTER: register,
+	CONFIRM_EMAIL: confirm_email,
+	PRODUCTS: products,
+	RESET_PASSWORD: reset_password,
 }
 
 export default exports

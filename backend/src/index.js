@@ -30,6 +30,15 @@ module.exports = {
           auth: false,
         },
       },
+      resolvers: {
+        Mutation: {
+          createOrder: {
+            resolve(_rootz, _args, ctx) {
+              console.log("hi");
+            },
+          },
+        },
+      },
       types: [
         nexus.extendType({
           type: "UsersPermissionsMe",

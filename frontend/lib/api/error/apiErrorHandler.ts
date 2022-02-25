@@ -4,8 +4,6 @@ export default function apiErrorHandler(
 	err: Error | ApiError,
 	res: NextApiResponse
 ) {
-	console.log(err)
-
 	if (err instanceof ApiError) {
 		return res.status(err.status).json({ error: err.message })
 	}

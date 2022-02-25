@@ -67,8 +67,10 @@ function ForgotPassword({ statusFlipper }: { statusFlipper: () => void }) {
 						width={50}
 						alt="A tick indicating success"
 					/>
-					Use the link that we have just mailed you in order to change your
-					password
+					<p>
+						Use the link that we have just mailed you in order to change your
+						password
+					</p>
 				</div>
 			) : (
 				<div className="relative">

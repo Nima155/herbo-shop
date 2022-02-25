@@ -1,0 +1,13 @@
+diff --git a/node_modules/@strapi/plugin-users-permissions/server/graphql/mutations/auth/email-confirmation.js b/node_modules/@strapi/plugin-users-permissions/server/graphql/mutations/auth/email-confirmation.js
+index 70c55f3..6c68131 100644
+--- a/node_modules/@strapi/plugin-users-permissions/server/graphql/mutations/auth/email-confirmation.js
++++ b/node_modules/@strapi/plugin-users-permissions/server/graphql/mutations/auth/email-confirmation.js
+@@ -19,7 +19,7 @@ module.exports = ({ nexus, strapi }) => {
+     async resolve(parent, args, context) {
+       const { koaContext } = context;
+ 
+-      koaContext.request.body = toPlainObject(args);
++      koaContext.request.query = toPlainObject(args);
+ 
+       await strapi
+         .plugin('users-permissions')

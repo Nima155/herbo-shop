@@ -32,7 +32,7 @@ export default function Header() {
 	return (
 		<header>
 			{/* <Modal modalActivator={() => {}}> */}
-			<nav className="flex justify-between p-2">
+			<nav className="flex justify-between p-2 items-center">
 				<Link href="/" passHref>
 					<a className="transition-opacity hover:opacity-70 cursor-pointer sm:block hidden">
 						<Logo width={82} height={40} />
