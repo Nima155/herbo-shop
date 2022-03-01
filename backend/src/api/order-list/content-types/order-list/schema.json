@@ -21,9 +21,9 @@
       "relation": "oneToOne",
       "target": "api::product.product"
     },
-    "orders": {
+    "order": {
       "type": "relation",
-      "relation": "manyToMany",
+      "relation": "manyToOne",
       "target": "api::order.order",
       "inversedBy": "order_lists"
     }

@@ -37,13 +37,17 @@
       "inversedBy": "products"
     },
     "picture": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
       "allowedTypes": [
         "images",
         "files",
         "videos"
-      ],
-      "type": "media",
-      "multiple": true,
+      ]
+    },
+    "sku": {
+      "type": "uid",
       "required": true
     }
   }

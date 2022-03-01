@@ -7,7 +7,7 @@ module.exports = {
 		extend: {
 			gridTemplateColumns: {
 				// Simple 16 column grid
-				'responsive-cols': 'repeat(auto-fill, minmax(264px, 1fr))',
+				'responsive-cols': 'repeat(auto-fill, minmax(264px, 386px))',
 			},
 		},
 	},

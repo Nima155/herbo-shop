@@ -21,10 +21,12 @@ const Home: NextPage<{ products: { products: { data: any } } }> = ({
 			</Head>
 
 			<Layout>
-				<ul className="grid gap-6 grid-cols-responsive-cols min-w-full justify-items-center mt-4">
-					{products.products.data.map(({ attributes }) => (
-						<ProductCard key={attributes.name} productDetails={attributes} />
-					))}
+				<ul className="grid gap-6 grid-cols-responsive-cols min-w-full justify-center mt-4">
+					{products.products.data.map(({ attributes, id }: any) => {
+						return (
+							<ProductCard key={attributes.name} productDetails={attributes} />
+						)
+					})}
 				</ul>
 			</Layout>
 		</div>
