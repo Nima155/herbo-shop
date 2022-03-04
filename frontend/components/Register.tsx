@@ -43,6 +43,19 @@ export default function Register() {
 
 	const mutation = useMutation(
 		async ({ password, username, email }: RegistrationForm) => {
+			const { id } = await fetch('/api/create-customer', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ email }),
+			})
+				.then((res) => {
+					if (!res.ok) throw Error('Failed to create customer_id')
+					return res.json()
+				})
+				.catch((e) => {})
+
 			await request(
 				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
 				queries.REGISTER,
@@ -50,11 +63,12 @@ export default function Register() {
 					password,
 					username,
 					email,
+					stripeId: id,
 				}
 			)
 		},
 		{
-			onError: (e) => {
+			onError: (e: any) => {
 				if (e?.response?.errors[0]?.message.toLowerCase().includes('email')) {
 					setError('email', { message: e?.response?.errors[0].message })
 				} else {

@@ -6,6 +6,7 @@ export default gql`
 			username
 			confirmed
 			blocked
+			stripe_id
 		}
 	}
 `

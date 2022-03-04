@@ -31,7 +31,7 @@ const StyledAnchor = styled.a.attrs({
 	className: 'hover:text-emerald-700',
 })``
 export default function Header() {
-	const { user, loginUser } = useUser()
+	const { user } = useUser()
 	const queryClient = useQueryClient()
 
 	const logoutMutation = useMutation(
@@ -81,7 +81,7 @@ export default function Header() {
 								leaveFrom="transform scale-100 opacity-100"
 								leaveTo="transform scale-95 opacity-0"
 							>
-								<Popover.Panel className="absolute z-10 p-2 overflow-hidden rounded-md border shadow-md shadow-emerald-200">
+								<Popover.Panel className="absolute z-10 p-2 overflow-hidden rounded-md border shadow-md shadow-emerald-200 bg-slate-100">
 									<div className="flex flex-col gap-2 text-sm capitalize">
 										<Link href="/current-account/update-profile" passHref>
 											<StyledAnchor>Profile</StyledAnchor>

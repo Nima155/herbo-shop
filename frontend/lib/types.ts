@@ -23,7 +23,7 @@ export interface ProductAttributes {
 	price: number
 	name: string
 	description: string
-	sku: string
+
 	picture: {
 		data: [
 			{

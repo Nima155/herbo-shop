@@ -1,9 +1,10 @@
 import '../styles/globals.css'
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
-import type { AppProps } from 'next/app'
+import type { AppProps, NextWebVitalsMetric } from 'next/app'
 import { useState } from 'react'
 import { CartProvider } from 'use-shopping-cart/react'
+
 function MyApp({ Component, pageProps }: AppProps) {
 	const [queryClient] = useState(() => new QueryClient())
 
@@ -21,7 +22,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 				<Hydrate state={pageProps.dehydratedState}>
 					<Component {...pageProps} />
 				</Hydrate>
-				<ReactQueryDevtools initialIsOpen={false} />
+				{/* <ReactQueryDevtools initialIsOpen={false} /> */}
 			</QueryClientProvider>
 		</CartProvider>
 	)

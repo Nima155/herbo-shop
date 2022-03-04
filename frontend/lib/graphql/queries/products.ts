@@ -1,13 +1,13 @@
 import { gql } from 'graphql-request'
 
 export default gql`
-	query Products($ids: [String]) {
-		products(filters: { sku: { in: $ids } }) {
+	query Products($ids: [ID]) {
+		products(filters: { id: { in: $ids } }) {
 			data {
+				id
 				attributes {
 					price
 					name
-					sku
 					categories {
 						data {
 							attributes {

@@ -1,9 +1,7 @@
 import React, { useState } from 'react'
 import { ProductAttributes } from '../lib/types'
 import Image from 'next/image'
-import { imageLoader } from '../lib/helpers'
 import Button from './Button'
-import { motion } from 'framer-motion'
 import { useShoppingCart, formatCurrencyString } from 'use-shopping-cart/react'
 import Carousel from './Carousel'
 export default function ProductCard({
@@ -30,14 +28,17 @@ export default function ProductCard({
 			</div>
 			<Carousel>
 				{productDetails.picture.data.map((e, i) => {
+					// console.log(e.attributes.formats.small.url)
+
 					return (
 						<Image
 							key={i}
-							loader={imageLoader}
-							src={e.attributes.formats.small.url}
+							// loader={imageLoader}
+							src={`${process.env.NEXT_PUBLIC_IMAGE_PREFIX}${e.attributes.formats.small.url}`}
 							width={e.attributes.formats.small.width - 200}
 							height={e.attributes.formats.small.height - 200}
 							alt={productDetails.description}
+							priority
 						/>
 					)
 				})}
@@ -61,11 +62,11 @@ export default function ProductCard({
 				onClick={() =>
 					addItem({
 						currency: 'USD',
-						price: productDetails.price,
 						name: productDetails.name,
-						image: `${process.env.NEXT_PUBLIC_IMAGE_URL}${productDetails.picture.data[0].attributes.formats.small.url}`,
+						image: `${process.env.NEXT_PUBLIC_IMAGE_PREFIX}${productDetails.picture.data[0].attributes.formats.small.url}`,
 						description: productDetails.description,
-						id: productDetails.sku,
+						id: productDetails.id,
+						price: productDetails.price,
 					})
 				}
 			>

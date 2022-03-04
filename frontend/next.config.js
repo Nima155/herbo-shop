@@ -21,9 +21,9 @@ const nextConfig = {
 	// experimental: {
 	// 	styledComponents: true,
 	// },
-	// images: {
-	// 	domains: [process.env.NEXT_PUBLIC_IMAGE_DOMAIN],
-	// },
+	images: {
+		domains: [process.env.NEXT_PUBLIC_IMAGE_DOMAIN],
+	},
 }
 
 module.exports = nextConfig

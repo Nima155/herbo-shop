@@ -73,6 +73,11 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::address.address"
+    },
+    "stripe_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
     }
   }
 }

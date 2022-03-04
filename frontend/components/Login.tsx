@@ -40,7 +40,7 @@ function ForgotPassword({ statusFlipper }: { statusFlipper: () => void }) {
 			return ok
 		},
 		{
-			onError: (errors) => {
+			onError: (errors: any) => {
 				setError('email', {
 					message: errors.response.errors[0].message,
 				})

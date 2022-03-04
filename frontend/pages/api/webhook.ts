@@ -39,7 +39,7 @@ export default async function handler(
 				break
 			// ... handle other event types
 			case 'checkout.session.completed':
-				const completedSession = event.data.object
+				const completedSession: any = event.data.object
 
 				const sess = await stripe.checkout.sessions.retrieve(
 					completedSession.id,

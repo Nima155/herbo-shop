@@ -1,10 +1,10 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import { dehydrate, DehydratedState, QueryClient } from 'react-query'
+import { dehydrate, QueryClient } from 'react-query'
 import Layout from '../components/Layout'
 
 import queries from '../lib/graphql'
-import { authenticatedGraphQl, imageLoader } from '../lib/helpers'
+import { authenticatedGraphQl } from '../lib/helpers'
 import ProductCard from '../components/ProductCard'
 
 const Home: NextPage<{ products: { products: { data: any } } }> = ({
@@ -24,7 +24,10 @@ const Home: NextPage<{ products: { products: { data: any } } }> = ({
 				<ul className="grid gap-6 grid-cols-responsive-cols min-w-full justify-center mt-4">
 					{products.products.data.map(({ attributes, id }: any) => {
 						return (
-							<ProductCard key={attributes.name} productDetails={attributes} />
+							<ProductCard
+								key={attributes.name}
+								productDetails={{ id, ...attributes }}
+							/>
 						)
 					})}
 				</ul>

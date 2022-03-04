@@ -32,11 +32,3 @@ export function authenticatedGraphQl(
 	)
 	return graphClient
 }
-
-export function imageLoader(resourceLocation: ImageLoaderProps) {
-	// console.log(
-	// 	`${process.env.NEXT_PUBLIC_IMAGE_URL}/${resourceLocation.width}_${resourceLocation.src}`
-	// )
-
-	return `${process.env.NEXT_PUBLIC_IMAGE_URL}${resourceLocation.src}`
-}

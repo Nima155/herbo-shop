@@ -41,11 +41,18 @@ module.exports = {
       //   },
       // },
       types: [
+        nexus.extendInputType({
+          type: "UsersPermissionsRegisterInput",
+          definition(t) {
+            t.string("stripe_id");
+          },
+        }),
         nexus.extendType({
           type: "UsersPermissionsMe",
           definition(t) {
             // here define fields you need
             t.list.field("addresses", { type: "Address" });
+            t.field("stripe_id", { type: "String" });
           },
         }),
         nexus.extendType({

@@ -16,23 +16,30 @@ export default async function handler(
 	// Check for secret to confirm this is a valid request
 
 	if (req.method === 'POST') {
-		const items = req.body
+		const { stripeId, ...rest } = req.body
 
+		// if (stripeId)
 		const databaseItems: {
-			products: { data: [{ attributes: ProductAttributes }] }
+			products: { data: [{ attributes: ProductAttributes; id: string }] }
 		} = await request(
 			process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
 			queries.PRODUCTS,
 			{
-				ids: Object.values(items).map((e: any) => e.id),
+				ids: Object.values(rest).map((e: any) => e.id),
 			}
 		)
 
+		// console.log(
+		// 	databaseItems.products.data.map((e) => {
+		// 		return { ...e.attributes, currency: 'USD' }
+		// 	})
+		// )
+
 		const line_items = validateCartItems(
 			databaseItems.products.data.map((e) => {
-				return { ...e.attributes, currency: 'USD' }
+				return { ...e.attributes, currency: 'USD', id: e.id }
 			}),
-			items
+			rest
 		)
 
 		const session = await stripe.checkout.sessions.create({
@@ -41,7 +48,7 @@ export default async function handler(
 			shipping_address_collection: {
 				allowed_countries: ['US', 'CA'],
 			},
-
+			customer: stripeId,
 			shipping_options: [
 				{
 					shipping_rate_data: {
