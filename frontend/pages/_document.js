@@ -10,10 +10,13 @@ class MyDocument extends Document {
 		return (
 			<Html>
 				<Head />
-				<body>
+
+				<body className="bg-slate-100">
 					<Main />
-					<div id="myportal"></div>
+
 					<NextScript />
+
+					<div className="z-30" id="toastContainer" />
 				</body>
 			</Html>
 		)

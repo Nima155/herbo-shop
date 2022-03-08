@@ -14,16 +14,21 @@ import { useShoppingCart } from 'use-shopping-cart/react'
 import Link from 'next/link'
 
 function CartButton() {
-	const { cartCount, redirectToCheckout } = useShoppingCart()
+	const { cartCount } = useShoppingCart()
+
 	return (
-		<Link href={'/cart'} passHref>
-			<div className="relative cursor-pointer">
-				<p className="absolute z-10 bg-emerald-700 bg-opacity-80 rounded-full h-5 w-5 text-slate-100 flex items-center text-xs justify-center -top-2 -right-2">
-					{cartCount}
-				</p>
-				<Image src="/basket.svg" height={25} width={25} alt="Basket" />
-			</div>
-		</Link>
+		<>
+			{/* <Toast /> */}
+
+			<Link href={'/cart'} passHref>
+				<div className="relative cursor-pointer">
+					<p className="absolute z-10 bg-emerald-700 bg-opacity-80 rounded-full h-5 w-5 text-slate-100 flex items-center text-xs justify-center -top-2 -right-2">
+						{cartCount}
+					</p>
+					<Image src="/basket.svg" height={25} width={25} alt="Basket" />
+				</div>
+			</Link>
+		</>
 	)
 }
 
@@ -46,10 +51,10 @@ export default function Header() {
 	)
 
 	return (
-		<header>
+		<header className="p-5 max-w-screen-xl mx-auto">
 			{/* <Modal modalActivator={() => {}}> */}
 			<nav className="flex justify-between p-2 items-center">
-				<Link href="/" passHref>
+				<Link href="/" passHref scroll={false}>
 					<a className="transition-opacity hover:opacity-70 cursor-pointer sm:block hidden">
 						<Logo width={82} height={40} />
 					</a>
@@ -83,13 +88,25 @@ export default function Header() {
 							>
 								<Popover.Panel className="absolute z-10 p-2 overflow-hidden rounded-md border shadow-md shadow-emerald-200 bg-slate-100">
 									<div className="flex flex-col gap-2 text-sm capitalize">
-										<Link href="/current-account/update-profile" passHref>
+										<Link
+											href="/current-account/update-profile"
+											passHref
+											scroll={false}
+										>
 											<StyledAnchor>Profile</StyledAnchor>
 										</Link>
-										<Link href="/current-account/address-details" passHref>
+										<Link
+											href="/current-account/address-details"
+											passHref
+											scroll={false}
+										>
 											<StyledAnchor>Shipping</StyledAnchor>
 										</Link>
-										<Link href="/current-account/orders" passHref>
+										<Link
+											href="/current-account/orders"
+											passHref
+											scroll={false}
+										>
 											<StyledAnchor>Orders</StyledAnchor>
 										</Link>
 										<button

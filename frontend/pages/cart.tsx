@@ -12,19 +12,22 @@ import SubmitButton from '../components/Input/SubmitButton'
 import CartItem from '../components/CartItem'
 
 export default function Cart() {
-	const { cartDetails, clearCart, redirectToCheckout, formattedTotalPrice } =
-		useShoppingCart()
+	const {
+		cartDetails,
+		clearCart,
+		redirectToCheckout,
+		formattedTotalPrice,
+		cartCount,
+	} = useShoppingCart()
 	const { user } = useUser()
 
 	return (
 		<Layout>
 			<div className="flex gap-2 justify-between mt-4">
 				<div className="flex flex-col p-2 flex-grow mb-20">
-					<AnimatePresence>
-						{Object.values(cartDetails).map((e: any) => (
-							<CartItem key={e.id} productId={e.id} />
-						))}
-					</AnimatePresence>
+					{Object.values(cartDetails).map((e: any) => (
+						<CartItem key={e.id} productId={e.id} />
+					))}
 				</div>
 				<div className="flex gap-2 fixed bottom-0 p-2 bg-slate-100 w-full justify-between left-0 border-t-slate-300 border-t sm:sticky sm:top-5 sm:w-auto sm:border-t-0 sm:self-start sm:flex-col sm:rounded-lg sm:shadow-lg sm:p-4">
 					<div className="flex flex-col">
@@ -36,6 +39,9 @@ export default function Cart() {
 					<div className="flex flex-col gap-1">
 						<SubmitButton
 							onClick={async () => {
+								if (cartCount === 0) {
+									return
+								}
 								const { id } = await (
 									await fetch('/api/create-checkout-session', {
 										method: 'POST',

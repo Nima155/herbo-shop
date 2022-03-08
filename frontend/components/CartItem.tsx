@@ -11,15 +11,7 @@ export default function CartItem({ productId }: { productId: string }) {
 	const productDetails = cartDetails[productId]
 
 	return (
-		<motion.div
-			initial={{
-				height: 132,
-				opacity: 1,
-			}} /* change height to something dynamic */
-			exit={{ height: 0 }}
-			key={productId}
-			// className="border border-red-500"
-		>
+		<motion.div key={productId} layout>
 			{productDetails && (
 				<div className="flex gap-2 p-2 border-t bg-white last:border-b">
 					{' '}

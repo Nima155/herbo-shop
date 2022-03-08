@@ -4,9 +4,13 @@ import { ReactQueryDevtools } from 'react-query/devtools'
 import type { AppProps, NextWebVitalsMetric } from 'next/app'
 import { useState } from 'react'
 import { CartProvider } from 'use-shopping-cart/react'
+import Header from '../components/Header'
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import React from 'react'
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps, router }: AppProps) {
 	const [queryClient] = useState(() => new QueryClient())
+	console.log(router.route)
 
 	return (
 		<CartProvider
@@ -20,7 +24,17 @@ function MyApp({ Component, pageProps }: AppProps) {
 		>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={pageProps.dehydratedState}>
-					<Component {...pageProps} />
+					<Header />
+
+					<AnimatePresence
+						exitBeforeEnter={true}
+						initial={false}
+						onExitComplete={() => {
+							window.scrollTo(0, 0)
+						}}
+					>
+						<Component {...pageProps} key={router.route} />
+					</AnimatePresence>
 				</Hydrate>
 				{/* <ReactQueryDevtools initialIsOpen={false} /> */}
 			</QueryClientProvider>

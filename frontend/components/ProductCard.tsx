@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ProductAttributes } from '../lib/types'
 import Image from 'next/image'
 import Button from './Button'
 import { useShoppingCart, formatCurrencyString } from 'use-shopping-cart/react'
 import Carousel from './Carousel'
+import Toast, { useToastStore } from './ToastNotifications'
+
 export default function ProductCard({
 	productDetails,
 }: {
@@ -15,9 +17,12 @@ export default function ProductCard({
 		currency: 'USD',
 		value: productDetails.price,
 	})
+	const { add: addToast } = useToastStore()
+	// const uniqueId_1 =
+	// console.log('render')
 
 	return (
-		<div className="flex flex-col p-5 rounded-lg shadow-md gap-1">
+		<li className="flex flex-col p-5 rounded-lg shadow-md gap-1">
 			<div className="flex justify-between items-center gap-2">
 				<p className="text-slate-700 font-semibold flex-grow-0">
 					{productDetails.name}
@@ -29,7 +34,6 @@ export default function ProductCard({
 			<Carousel>
 				{productDetails.picture.data.map((e, i) => {
 					// console.log(e.attributes.formats.small.url)
-
 					return (
 						<Image
 							key={i}
@@ -38,7 +42,6 @@ export default function ProductCard({
 							width={e.attributes.formats.small.width - 200}
 							height={e.attributes.formats.small.height - 200}
 							alt={productDetails.description}
-							priority
 						/>
 					)
 				})}
@@ -59,7 +62,7 @@ export default function ProductCard({
 						setIsPressed(true)
 					}
 				}}
-				onClick={() =>
+				onClick={() => {
 					addItem({
 						currency: 'USD',
 						name: productDetails.name,
@@ -68,10 +71,16 @@ export default function ProductCard({
 						id: productDetails.id,
 						price: productDetails.price,
 					})
-				}
+					addToast({
+						id: `${productDetails.id} ${Date.now()}`,
+						message: `Added ${productDetails.name} to the basket`,
+						typ: 'success',
+					})
+					// showPortal(uId.toString())
+				}}
 			>
 				Add to Cart{' '}
 			</Button>
-		</div>
+		</li>
 	)
 }
