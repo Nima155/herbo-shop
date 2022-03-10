@@ -3,7 +3,7 @@ import { Address } from '../lib/types'
 import Image from 'next/image'
 import Modal from './Modal'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
-import { RadioGroup } from '@headlessui/react'
+import { Dialog, RadioGroup } from '@headlessui/react'
 import SubmitButton from './Input/SubmitButton'
 
 export default function AddressCard(props: {
@@ -28,7 +28,7 @@ export default function AddressCard(props: {
 						<div
 							className={`${!checked && 'opacity-50'} ${
 								checked ? 'shadow-lg' : 'shadow-md'
-							} rounded-lg bg-white p-2 relative transition-all`}
+							} rounded-lg bg-white p-2 relative transition-all flex flex-col items-start`}
 						>
 							<motion.div className={`absolute right-2 top-2 h-6 w-6`}>
 								<CheckIcon
@@ -37,19 +37,34 @@ export default function AddressCard(props: {
 									} rounded-full transition-colors`}
 								/>
 							</motion.div>
-							<motion.p layoutId={`countryid ${addressDetails?.zipCode}`}>
+							<motion.p
+								layoutId={`country ${addressDetails?.zipCode}`}
+								className="self-start"
+							>
 								{addressDetails?.country}
 							</motion.p>
-							<motion.p layoutId={`countyid ${addressDetails?.zipCode}`}>
+							<motion.p
+								layoutId={`county ${addressDetails?.zipCode}`}
+								className="self-start"
+							>
 								{addressDetails?.county}
 							</motion.p>
-							<motion.p layoutId={`cityid ${addressDetails?.zipCode}`}>
+							<motion.p
+								layoutId={`city ${addressDetails?.zipCode}`}
+								className="self-start"
+							>
 								{addressDetails?.city}
 							</motion.p>
-							<motion.p layoutId={`addressid ${addressDetails?.zipCode}`}>
+							<motion.p
+								layoutId={`address ${addressDetails?.zipCode}`}
+								className="self-start"
+							>
 								{addressDetails?.addressOne}
 							</motion.p>
-							<motion.p layoutId={`zipid ${addressDetails?.zipCode}`}>
+							<motion.p
+								layoutId={`zip ${addressDetails?.zipCode}`}
+								className="self-start"
+							>
 								{addressDetails?.zipCode}
 							</motion.p>
 							<motion.button
@@ -57,7 +72,7 @@ export default function AddressCard(props: {
 									setModalStatus(true)
 									e.stopPropagation()
 								}}
-								className="hover:underline ml-auto block text-sm font-medium text-slate-500"
+								className="hover:underline ml-auto inline-block text-sm font-medium text-slate-500"
 								layoutId={`button ${addressDetails.zipCode}`}
 							>
 								edit
@@ -70,67 +85,69 @@ export default function AddressCard(props: {
 			<AnimatePresence>
 				{modalStatus && (
 					<>
-						<motion.div
-							className="z-30 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+						<Dialog
+							open={modalStatus}
+							onClose={() => {
+								setModalStatus(false)
+							}}
+							as={motion.div}
 							key={'modal'}
+							className="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center"
 						>
+							<Dialog.Overlay
+								className="fixed inset-0 bg-black"
+								key={'backdrop'}
+								as={motion.div}
+								variants={{
+									hidden: {
+										opacity: 0,
+										transition: {
+											duration: 0.16,
+										},
+									},
+									visible: {
+										opacity: 0.3,
+										transition: {
+											delay: 0.04,
+											duration: 0.2,
+										},
+									},
+								}}
+								initial="hidden"
+								exit="hidden"
+								animate="visible"
+							/>
 							<motion.div
 								layoutId={`dep ${addressDetails?.zipCode}`}
-								className="bg-white rounded-lg p-2 sm:h-96 sm:w-96 h-60 w-52 mx-auto"
+								className="bg-white rounded-lg p-2 relative flex flex-col items-start"
 							>
-								Country:
-								<motion.p layoutId={`countryid ${addressDetails?.zipCode}`}>
+								<motion.p layoutId={`country ${addressDetails?.zipCode}`}>
 									{addressDetails?.country}
 								</motion.p>
-								Country:
-								<motion.p layoutId={`countyid ${addressDetails?.zipCode}`}>
+
+								<motion.p layoutId={`county ${addressDetails?.zipCode}`}>
 									{addressDetails?.county}
 								</motion.p>
-								Country:
-								<motion.p layoutId={`cityid ${addressDetails?.zipCode}`}>
+
+								<motion.p layoutId={`city ${addressDetails?.zipCode}`}>
 									{addressDetails?.city}
 								</motion.p>
-								Country:
-								<motion.p layoutId={`addressid ${addressDetails?.zipCode}`}>
+
+								<motion.p layoutId={`address ${addressDetails?.zipCode}`}>
 									{addressDetails?.addressOne}
 								</motion.p>
-								Country:
-								<motion.p layoutId={`zipid ${addressDetails?.zipCode}`}>
+
+								<motion.p layoutId={`zip ${addressDetails?.zipCode}`}>
 									{addressDetails?.zipCode}
 								</motion.p>
 								<motion.button
 									layoutId={`button ${addressDetails.zipCode}`}
-									className="text-sm mt-4 bg-emerald-400 px-4 py-1 text-slate-100 rounded-lg"
+									className="text-sm mt-4 bg-emerald-400 px-4 py-1 text-slate-100 rounded-lg inline-block"
 								>
 									update
 								</motion.button>
 							</motion.div>
-						</motion.div>
-						<motion.div
-							className="inset-0 bg-black/40 absolute z-10"
-							onClick={(e) => {
-								setModalStatus(false)
-							}}
-							key={'backdrop'}
-							variants={{
-								hidden: {
-									opacity: 0,
-									transition: {
-										duration: 0.16,
-									},
-								},
-								visible: {
-									opacity: 0.8,
-									transition: {
-										delay: 0.04,
-										duration: 0.2,
-									},
-								},
-							}}
-							initial="hidden"
-							exit="hidden"
-							animate="visible"
-						/>
+						</Dialog>
 					</>
 				)}
 			</AnimatePresence>
