@@ -19,6 +19,20 @@ interface StrapiPicture {
 	}
 }
 
+export enum AddressType {
+	shipping = 'shipping',
+	billing = 'billing',
+}
+
+export type Address = {
+	country: string
+	addressOne: string
+	county: string
+	city: string
+	zipCode: string
+	addressType: AddressType
+}
+
 export interface ProductAttributes {
 	price: number
 	name: string

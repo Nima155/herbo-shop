@@ -1,6 +1,6 @@
 import { GetServerSideProps } from 'next'
 import React from 'react'
-import { AnimatePresence, Reorder } from 'framer-motion'
+import { AnimatePresence, LayoutGroup, Reorder, motion } from 'framer-motion'
 import { dehydrate, QueryClient } from 'react-query'
 import { useShoppingCart } from 'use-shopping-cart/react'
 import Layout from '../components/Layout'
@@ -25,9 +25,13 @@ export default function Cart() {
 		<Layout>
 			<div className="flex gap-2 justify-between mt-4">
 				<div className="flex flex-col p-2 flex-grow mb-20">
-					{Object.values(cartDetails).map((e: any) => (
-						<CartItem key={e.id} productId={e.id} />
-					))}
+					<AnimatePresence initial={false} exitBeforeEnter>
+						<LayoutGroup>
+							{Object.values(cartDetails).map((e: any) => (
+								<CartItem key={e.id} productId={e.id} />
+							))}
+						</LayoutGroup>
+					</AnimatePresence>
 				</div>
 				<div className="flex gap-2 fixed bottom-0 p-2 bg-slate-100 w-full justify-between left-0 border-t-slate-300 border-t sm:sticky sm:top-5 sm:w-auto sm:border-t-0 sm:self-start sm:flex-col sm:rounded-lg sm:shadow-lg sm:p-4">
 					<div className="flex flex-col">

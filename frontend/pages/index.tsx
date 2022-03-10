@@ -23,8 +23,7 @@ const Home: NextPage<{ products: { products: { data: any } } }> = ({
 			</Head>
 
 			<Layout>
-				<NotificationContainer />
-				<ul className="grid gap-6 grid-cols-responsive-cols min-w-full justify-center mt-4">
+				<ul className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4">
 					{products.products.data.map(({ attributes, id }: any) => {
 						// console.log(attributes)
 
@@ -64,26 +63,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			products,
 		},
 	}
-}
-
-function NotificationContainer() {
-	const { toasts } = useToastStore()
-	return ReactDOM.createPortal(
-		<LayoutGroup>
-			<motion.ul className="fixed right-0 bottom-0 flex flex-col justify-end gap-2 p-8">
-				<AnimatePresence initial={false}>
-					{/* <LayoutGroup> */}
-					{toasts.map((e) => (
-						<Toast key={e.id} id={e.id} options={{ status: e.typ }}>
-							<p>{e.message}</p>
-						</Toast>
-					))}
-					{/* </LayoutGroup> */}
-				</AnimatePresence>
-			</motion.ul>
-		</LayoutGroup>,
-		document.getElementById('toastContainer')!
-	)
 }
 
 export default Home

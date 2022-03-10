@@ -7,10 +7,11 @@ import { CartProvider } from 'use-shopping-cart/react'
 import Header from '../components/Header'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import React from 'react'
+import Toast, { useToastStore } from '../components/ToastNotifications'
+import ReactDOM from 'react-dom'
 
 function MyApp({ Component, pageProps, router }: AppProps) {
 	const [queryClient] = useState(() => new QueryClient())
-	console.log(router.route)
 
 	return (
 		<CartProvider
@@ -25,6 +26,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={pageProps.dehydratedState}>
 					<Header />
+					<NotificationContainer />
 
 					<AnimatePresence
 						exitBeforeEnter={true}
@@ -36,9 +38,29 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 						<Component {...pageProps} key={router.route} />
 					</AnimatePresence>
 				</Hydrate>
-				{/* <ReactQueryDevtools initialIsOpen={false} /> */}
+				<ReactQueryDevtools initialIsOpen={false} />
 			</QueryClientProvider>
 		</CartProvider>
+	)
+}
+
+function NotificationContainer() {
+	const { toasts } = useToastStore()
+	return ReactDOM.createPortal(
+		<LayoutGroup>
+			<motion.ul className="fixed sm:right-0 sm:bottom-0 flex flex-col justify-end gap-2 p-8 top-8 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-auto sm:top-auto">
+				<AnimatePresence initial={false}>
+					{/* <LayoutGroup> */}
+					{toasts.map((e) => (
+						<Toast key={e.id} id={e.id} options={{ status: e.typ }}>
+							<p>{e.message}</p>
+						</Toast>
+					))}
+					{/* </LayoutGroup> */}
+				</AnimatePresence>
+			</motion.ul>
+		</LayoutGroup>,
+		document.getElementById('toastContainer')!
 	)
 }
 

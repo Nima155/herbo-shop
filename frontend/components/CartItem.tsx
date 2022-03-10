@@ -11,7 +11,12 @@ export default function CartItem({ productId }: { productId: string }) {
 	const productDetails = cartDetails[productId]
 
 	return (
-		<motion.div key={productId} layout>
+		<motion.div
+			// layout="position"
+			// layoutId={productId}
+			initial={false}
+			layout="position"
+		>
 			{productDetails && (
 				<div className="flex gap-2 p-2 border-t bg-white last:border-b">
 					{' '}
