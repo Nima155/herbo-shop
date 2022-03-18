@@ -38,9 +38,9 @@ export default function LoadingDots() {
 			className="flex gap-1 justify-center items-center z-50 bg-white/80 inset-0 absolute rounded-md"
 		>
 			{[0, 1, 2].map((e) => (
-				<motion.span
+				<motion.div
 					variants={ITEM}
-					className="bg-green-900 rounded-full w-3 h-3 block"
+					className="bg-green-900 rounded-full w-3 h-3 inline-block"
 					transition={TRANSITION}
 					key={e}
 				/>

@@ -28,16 +28,24 @@
       "type": "string",
       "required": true
     },
-    "county": {
+    "phone_number": {
       "type": "string",
       "required": true
     },
-    "address_type": {
-      "type": "enumeration",
-      "enum": [
-        "billing",
-        "shipping"
-      ],
+    "first_name": {
+      "type": "string",
+      "required": true
+    },
+    "last_name": {
+      "type": "string",
+      "required": true
+    },
+    "state": {
+      "type": "string",
+      "required": true
+    },
+    "is_billing": {
+      "type": "boolean",
       "required": true
     }
   }

@@ -30,7 +30,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 
 					<AnimatePresence
 						exitBeforeEnter={true}
-						initial={false}
+						// initial={false}
 						onExitComplete={() => {
 							window.scrollTo(0, 0)
 						}}
@@ -63,5 +63,4 @@ function NotificationContainer() {
 		document.getElementById('toastContainer')!
 	)
 }
-
 export default MyApp

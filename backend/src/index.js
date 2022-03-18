@@ -20,26 +20,66 @@ module.exports = {
    */
   register({ strapi }) {
     const extensionService = strapi.plugin("graphql").service("extension");
+    const { toEntityResponse } = strapi
+      .plugin("graphql")
+      .service("format").returnTypes;
     extensionService.use(({ nexus }) => ({
       resolversConfig: {
         "Mutation.login": {
           middlewares: MIDDLEWARES, // CSRF check
         },
-
+        "Mutation.createAddress": {
+          middlewares: MIDDLEWARES, // CSRF check
+        },
         "Query._csrf": {
           auth: false,
         },
       },
-      // resolvers: {
-      //   Mutation: {
-      //     createOrder: {
-      //       resolve(_rootz, _args, ctx) {
-      //         // console.log(strapi);
-      //         console.log(_args);
-      //       },
-      //     },
-      //   },
-      // },
+      resolvers: {
+        Mutation: {
+          createAddress: {
+            async resolve(_rootz, args, ctx) {
+              // console.log(strapi);
+
+              if (ctx.state.user.addresses.length >= 3) {
+                throw new Error("You can only save up to 3 addresses.");
+              }
+
+              if (args.data.is_billing) {
+                await strapi.db.query("api::address.address").updateMany({
+                  where: {
+                    id: ctx.state.user.addresses.map((e) => e.id),
+                  },
+                  data: {
+                    is_billing: false,
+                  },
+                });
+              }
+
+              const entry = await strapi.entityService.create(
+                "api::address.address",
+                {
+                  data: args.data,
+                }
+              );
+              await strapi.entityService.update(
+                "plugin::users-permissions.user",
+                ctx.state.user.id,
+                {
+                  data: {
+                    addresses: [...ctx.state.user.addresses, entry.id],
+                  },
+                }
+              );
+
+              return toEntityResponse(entry, {
+                args,
+                resourceUID: "api::address.address",
+              });
+            },
+          },
+        },
+      },
       types: [
         nexus.extendInputType({
           type: "UsersPermissionsRegisterInput",
@@ -51,7 +91,7 @@ module.exports = {
           type: "UsersPermissionsMe",
           definition(t) {
             // here define fields you need
-            t.list.field("addresses", { type: "Address" });
+            t.list.field("addresses", { type: "AddressEntity" });
             t.field("stripe_id", { type: "String" });
           },
         }),

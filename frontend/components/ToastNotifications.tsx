@@ -1,7 +1,7 @@
 import produce from 'immer'
 import create from 'zustand'
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion'
-import ReactDOM from 'react-dom'
+import { motion } from 'framer-motion'
+
 import React from 'react'
 import Image from 'next/image'
 import Button from './Button'
