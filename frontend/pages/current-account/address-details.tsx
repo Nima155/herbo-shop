@@ -1,53 +1,45 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import AddressCard from '../../components/AddressCard'
 import { RadioGroup } from '@headlessui/react'
 import Layout from '../../components/Layout'
-import { type Address, AddressType } from '../../lib/types'
+
 import { GetServerSideProps } from 'next'
-import { dehydrate, QueryClient, useMutation, useQuery } from 'react-query'
+import { dehydrate, QueryClient, useQuery, useQueryClient } from 'react-query'
 import { authenticatedGraphQl } from '../../lib/helpers'
 
 import queries from '../../lib/graphql'
 
 import AddressForm from '../../components/AddressForm'
-
-const addresses: Address[] = [
-	{
-		country: 'United States',
-		city: 'New york',
-		addressOne: 'Manhattan no 1',
-		addressType: AddressType.Shipping,
-		firstName: 'Jake',
-		lastName: 'Baldino',
-		phoneNumber: '4421242121',
-		zipCode: 'LS28 8DS',
-		state: 'NY',
-	},
-	{
-		country: 'IR',
-		city: 'Mashad',
-		addressOne: 'Damavand st',
-		addressType: AddressType.Shipping,
-		firstName: 'Karun',
-		lastName: 'Man',
-		phoneNumber: '21312',
-		zipCode: 'DS 3R00221',
-		state: 'Khorasan',
-	},
-	{
-		country: 'GER',
-		city: 'Frankfurt',
-		addressOne: 'Authzeieden no 1',
-		addressType: AddressType.Shipping,
-		firstName: 'Lidya',
-		lastName: 'Staple',
-		phoneNumber: '2313215542',
-		zipCode: 'LS2332 21DS',
-		state: 'Frankfurt',
-	},
-]
+import camelCaseKeys from 'camelcase-keys'
 export default function Shipping() {
-	const [selected, setSelected] = useState(addresses[0])
+	// const queryClient = useQueryClient()
+	const gqlClient = authenticatedGraphQl()
+	const { GET_ADDRESSES } = queries
+
+	const { data: userAddresses } = useQuery(
+		'user_addresses',
+		async () => {
+			const data_1 = await gqlClient.request(GET_ADDRESSES)
+			return data_1
+		},
+		{ staleTime: 5000 }
+	)
+
+	const addresses = useMemo(
+		() =>
+			camelCaseKeys(userAddresses?.me?.addresses, {
+				deep: true,
+			}).map((e) => {
+				const addressOne = e.attributes.address1
+				delete e.attributes['address1']
+				e.attributes['addressOne'] = addressOne
+				return e
+			}),
+		[userAddresses]
+	)
+
+	const [selected, setSelected] = useState(addresses[0].attributes)
+
 	// const [modalStatus, setModalStatus] = useState(-1)
 	return (
 		<Layout>
@@ -64,8 +56,11 @@ export default function Shipping() {
 						<RadioGroup.Label className="sr-only">
 							My addresses
 						</RadioGroup.Label>
-						{addresses.map((add, i) => (
-							<AddressCard addressDetails={add} key={add.zipCode} />
+						{addresses.map((add) => (
+							<AddressCard
+								addressDetails={{ ...add.attributes, id: add.id }}
+								key={add.id}
+							/>
 						))}
 					</RadioGroup>
 				</section>
@@ -87,12 +82,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	const gqlClient = authenticatedGraphQl(context.req.cookies)
 
 	const queryClient = new QueryClient()
-	const { USER_INFO } = queries
+	const { USER_INFO, GET_ADDRESSES } = queries
 
 	// console.log(products.products.data[0].attributes.picture.data[0].attributes)
-	await queryClient.prefetchQuery('user_stats', async () => {
+	const userStatsPromise = queryClient.prefetchQuery('user_stats', async () => {
 		return gqlClient.request(USER_INFO)
 	})
+	const userAddressesPromise = queryClient.prefetchQuery(
+		'user_addresses',
+		async () => {
+			return gqlClient.request(GET_ADDRESSES)
+		}
+	)
+
+	await Promise.all([userStatsPromise, userAddressesPromise])
 
 	return {
 		props: {

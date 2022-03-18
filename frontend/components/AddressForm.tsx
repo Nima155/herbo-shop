@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { useMutation } from 'react-query'
 import { AVAILABLE_COUNTRIES } from '../lib/constants'
 import { authenticatedGraphQl } from '../lib/helpers'
-import { Address, AddressType } from '../lib/types'
+import { IAddress } from '../lib/types'
 import Input from './Input'
 import InputLabelWrapper from './Input/InputLabelWrapper'
 import Label from './Input/Label'
@@ -11,13 +11,12 @@ import LoadingDots from './LoadingDots'
 import queries from '../lib/graphql'
 
 const { CREATE_ADDRESS, CSRF } = queries
-type FormAddress = Omit<Address, 'addressType'> & { isAlsoBilling: boolean }
 
 export default function AddressForm(props: {
 	buttonText: string
-	address?: Address
+	address?: IAddress & { id?: string }
 }) {
-	const { buttonText, address } = props
+	const { buttonText, address: { id: addressId = '', ...rest } = {} } = props
 
 	const {
 		register,
@@ -27,18 +26,21 @@ export default function AddressForm(props: {
 		setError,
 		clearErrors,
 		reset,
-	} = useForm<FormAddress>({
+	} = useForm<IAddress>({
 		reValidateMode: 'onSubmit',
-		defaultValues: { ...address },
+		defaultValues: rest,
 	})
+
+	// const [isDefault, _] = useState(address?.isBilling)
+
 	const gqlClient = authenticatedGraphQl()
 
 	const mutation = useMutation(
-		async (data: FormAddress) => {
+		async (data: IAddress) => {
 			const { _csrf } = await gqlClient.request(CSRF)
 
 			const {
-				isAlsoBilling,
+				isBilling,
 				addressOne,
 				zipCode,
 				firstName,
@@ -53,7 +55,7 @@ export default function AddressForm(props: {
 					address: {
 						...rest,
 						address_1: addressOne,
-						is_billing: isAlsoBilling,
+						is_billing: isBilling,
 						zip_code: zipCode,
 						first_name: firstName,
 						last_name: lastName,
@@ -67,27 +69,26 @@ export default function AddressForm(props: {
 		},
 		{
 			onError: (err) => {
-				setError('isAlsoBilling', { message: err.response.errors[0].message })
+				setError('isBilling', { message: err.response.errors[0].message })
 			},
 			onSuccess: (data) => {
 				// TODO.. check if shipping then...
-				if (
-					data.createAddress.data.attributes.address_type ===
-					AddressType.Billing
-				) {
+				if (data.createAddress.data.attributes.is_billing) {
 				}
 
-				reset()
+				if (!rest) {
+					reset()
+				}
 			},
 		}
 	)
 
-	const onAddressCreate = (data: FormAddress) => {
+	const onAddressCreate = (data: IAddress) => {
 		mutation.mutate(data)
 	}
 
 	const chosenCountry = watch('country')
-	// console.log(chosenCountry)
+
 	return (
 		<div className="relative w-full">
 			<form
@@ -272,9 +273,9 @@ export default function AddressForm(props: {
 					<div>
 						<input
 							type="checkbox"
-							id="billingBox"
-							{...register('isAlsoBilling')}
-							className="sr-only peer"
+							id={`billingBox ${addressId}`}
+							className="peer sr-only"
+							{...register('isBilling')}
 						/>
 						<Label
 							className="flex items-center normal-case cursor-pointer rounded-md
@@ -284,14 +285,14 @@ export default function AddressForm(props: {
 							before:flex before:items-center before:justify-center 
 							peer-focus-visible:ring-[#059669]/40 
 							peer-focus-visible:ring-1 peer-focus-visible:ring-offset-2"
-							htmlFor="billingBox"
+							htmlFor={`billingBox ${addressId}`}
 						>
 							Set as default billing address
 						</Label>
 					</div>
-					{errors.isAlsoBilling && (
+					{errors.isBilling && (
 						<span className="text-red-800 text-xs">
-							{errors?.isAlsoBilling.message}
+							{errors?.isBilling.message}
 						</span>
 					)}
 				</InputLabelWrapper>

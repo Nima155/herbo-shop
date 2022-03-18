@@ -12,7 +12,7 @@ export default gql`
 					phone_number
 					first_name
 					last_name
-					address_type
+					is_billing
 				}
 			}
 		}

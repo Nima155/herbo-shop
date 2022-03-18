@@ -12,7 +12,9 @@ export default gql`
 					country
 					first_name
 					last_name
-					address_type
+					is_billing
+					state
+					phone_number
 				}
 			}
 		}

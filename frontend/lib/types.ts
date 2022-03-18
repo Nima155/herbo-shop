@@ -19,12 +19,7 @@ interface StrapiPicture {
 	}
 }
 
-export enum AddressType {
-	Shipping = 'Shipping',
-	Billing = 'Billing',
-}
-
-export type Address = {
+export interface IAddress {
 	firstName: string
 	lastName: string
 	country: string
@@ -32,7 +27,7 @@ export type Address = {
 	city: string
 	zipCode: string
 	phoneNumber: string
-	addressType: AddressType
+	isBilling: boolean
 	state: string
 }
 

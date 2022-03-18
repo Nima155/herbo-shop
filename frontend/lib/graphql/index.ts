@@ -8,6 +8,7 @@ import confirm_email from './mutations/confirm_email'
 import products from './queries/products'
 import reset_password from './mutations/reset_password'
 import create_address from './mutations/create_address'
+import get_addresses from './queries/user_addresses'
 const exports = {
 	CSRF: csrf,
 	LOGIN: login,
@@ -19,6 +20,7 @@ const exports = {
 	PRODUCTS: products,
 	RESET_PASSWORD: reset_password,
 	CREATE_ADDRESS: create_address,
+	GET_ADDRESSES: get_addresses,
 }
 
 export default exports

@@ -1,11 +1,11 @@
 import React, { Fragment, useState } from 'react'
-import { Address } from '../lib/types'
+import { IAddress } from '../lib/types'
 
 import { Dialog, RadioGroup, Transition } from '@headlessui/react'
 import AddressForm from './AddressForm'
 
 export default function AddressCard(props: {
-	addressDetails: Address
+	addressDetails: IAddress
 	className?: string
 }) {
 	const { addressDetails, className } = props
@@ -75,7 +75,7 @@ export default function AddressCard(props: {
 					<Dialog.Overlay className="fixed inset-0 bg-black/30" />
 
 					<div className="bg-white rounded-lg py-2 px-3 relative flex flex-col items-start">
-						<AddressForm address={addressDetails} buttonText="Update Address" />
+						<AddressForm address={addressDetails} buttonText="Apply Changes" />
 					</div>
 				</Dialog>
 			</Transition>
