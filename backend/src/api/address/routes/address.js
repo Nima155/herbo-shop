@@ -7,8 +7,8 @@
 const { createCoreRouter } = require("@strapi/strapi").factories;
 
 module.exports = createCoreRouter(
-  "api::address.address"
-  // { only: [] }
+  "api::address.address",
+  { only: [] }
   /*{  
   only: ["find", "findOne"],
   config: {

@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { useMutation } from 'react-query'
+import { useMutation, useQueryClient } from 'react-query'
 import { AVAILABLE_COUNTRIES } from '../lib/constants'
 import { authenticatedGraphQl } from '../lib/helpers'
 import { IAddress } from '../lib/types'
@@ -9,15 +9,23 @@ import Label from './Input/Label'
 import SubmitButton from './Input/SubmitButton'
 import LoadingDots from './LoadingDots'
 import queries from '../lib/graphql'
+import produce from 'immer'
 
-const { CREATE_ADDRESS, CSRF } = queries
+const { CSRF } = queries
 
 export default function AddressForm(props: {
 	buttonText: string
 	address?: IAddress & { id?: string }
+	query: { queryURL: string; queryArgs?: any }
+	closeModal?: () => void
 }) {
-	const { buttonText, address: { id: addressId = '', ...rest } = {} } = props
+	const {
+		query,
+		buttonText,
+		address: { id: addressId = '', ...rest } = {},
+	} = props
 
+	const queryClient = useQueryClient()
 	const {
 		register,
 		formState: { errors },
@@ -28,7 +36,16 @@ export default function AddressForm(props: {
 		reset,
 	} = useForm<IAddress>({
 		reValidateMode: 'onSubmit',
-		defaultValues: rest,
+		defaultValues: {
+			...rest,
+			...(props.address && {
+				phoneNumber: rest?.phoneNumber.slice(
+					AVAILABLE_COUNTRIES.find(
+						(e) => e.value === rest?.country
+					)?.phoneCode.toString().length
+				),
+			}),
+		},
 	})
 
 	// const [isDefault, _] = useState(address?.isBilling)
@@ -40,27 +57,29 @@ export default function AddressForm(props: {
 			const { _csrf } = await gqlClient.request(CSRF)
 
 			const {
-				isBilling,
 				addressOne,
 				zipCode,
 				firstName,
 				lastName,
 				phoneNumber,
+				isShipping,
 				...rest
 			} = data
 
 			return await gqlClient.request(
-				CREATE_ADDRESS,
+				query.queryURL,
 				{
 					address: {
 						...rest,
+						is_shipping: isShipping,
 						address_1: addressOne,
-						is_billing: isBilling,
+						// is_billing: isBilling,
 						zip_code: zipCode,
 						first_name: firstName,
 						last_name: lastName,
 						phone_number: phoneNumber,
 					},
+					...query.queryArgs,
 				},
 				{
 					'x-xsrf-token': _csrf,
@@ -69,15 +88,41 @@ export default function AddressForm(props: {
 		},
 		{
 			onError: (err) => {
-				setError('isBilling', { message: err.response.errors[0].message })
+				setError('phoneNumber', { message: err.response.errors[0].message })
 			},
-			onSuccess: (data) => {
-				// TODO.. check if shipping then...
-				if (data.createAddress.data.attributes.is_billing) {
-				}
+			onSuccess: (res) => {
+				// if (
+				// 	res?.createAddress?.data.attributes.is_billing ||
+				// 	res?.updateAddress?.data.attributes.is_billing
+				// ) {
+				// 	// TODO.. check if shipping then...communicate with stripe
+				// 	queryClient.setQueryData('user_addresses', (old) => {
+				// 		return produce(old, (newState) => {
+				// 			newState.me.addresses = newState.me.addresses.map((e) => {
+				// 				const { attributes, id } = e
+				// 				return { id, attributes: { ...attributes, is_billing: false } }
+				// 			})
+				// 		})
+				// 	})
+				// }
 
-				if (!rest) {
+				if (!props.address) {
+					queryClient.setQueryData('user_addresses', (old) => {
+						return produce(old, (newState) => {
+							newState.me.addresses.push(res.createAddress.data)
+						})
+					})
 					reset()
+				} else {
+					queryClient.setQueryData('user_addresses', (old) => {
+						return produce(old, (newState) => {
+							const new_new = newState.me.addresses.filter(
+								(e) => e.id !== res.updateAddress.data.id
+							)
+							newState.me.addresses = [...new_new, res.updateAddress.data]
+						})
+					})
+					props?.closeModal!()
 				}
 			},
 		}
@@ -168,7 +213,7 @@ export default function AddressForm(props: {
 						<option value="">Select Country</option>
 						{AVAILABLE_COUNTRIES.map(
 							({ value: name, code: countryCode, map: mapEmoji }) => (
-								<option value={name} key={countryCode}>
+								<option value={countryCode} key={countryCode}>
 									{`${mapEmoji} ${name}`}
 								</option>
 							)
@@ -239,7 +284,7 @@ export default function AddressForm(props: {
 					<div className="flex gap-2">
 						<span className="bg-slate-300/60 p-1 text-slate-700 flex items-center rounded-sm">
 							+
-							{AVAILABLE_COUNTRIES.filter((e) => e.value === chosenCountry)[0]
+							{AVAILABLE_COUNTRIES.filter((e) => e.code === chosenCountry)[0]
 								?.phoneCode || '00'}
 						</span>
 						<Input
@@ -253,7 +298,7 @@ export default function AddressForm(props: {
 								setValueAs: (v) =>
 									`${
 										AVAILABLE_COUNTRIES.filter(
-											(e) => e.value === chosenCountry
+											(e) => e.code === chosenCountry
 										)[0]?.phoneCode
 									}${v}`,
 								onChange: () => {
@@ -269,7 +314,7 @@ export default function AddressForm(props: {
 						</span>
 					)}
 				</InputLabelWrapper>
-				<InputLabelWrapper>
+				{/* <InputLabelWrapper>
 					<div>
 						<input
 							type="checkbox"
@@ -295,7 +340,7 @@ export default function AddressForm(props: {
 							{errors?.isBilling.message}
 						</span>
 					)}
-				</InputLabelWrapper>
+				</InputLabelWrapper> */}
 
 				{mutation.isLoading && <LoadingDots />}
 				<SubmitButton className="mb-2 mt-2">{buttonText}</SubmitButton>

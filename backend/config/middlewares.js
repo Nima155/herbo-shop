@@ -8,6 +8,8 @@ module.exports = [
     config: {
       enabled: true,
       credentials: true,
+      maxAge: 31536000,
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
       headers: [
         "Content-Type",
         "Authorization",
@@ -16,6 +18,7 @@ module.exports = [
         "x-xsrf-token",
       ],
       origin: ["http://localhost:3000", "http://localhost:1337"],
+      keepHeadersOnError: false,
     },
   },
   "strapi::poweredBy",

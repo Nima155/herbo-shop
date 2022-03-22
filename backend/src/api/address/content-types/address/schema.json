@@ -44,9 +44,10 @@
       "type": "string",
       "required": true
     },
-    "is_billing": {
+    "is_shipping": {
       "type": "boolean",
-      "required": true
+      "default": false,
+      "required": false
     }
   }
 }

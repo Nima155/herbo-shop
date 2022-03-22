@@ -1,21 +1,75 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import AddressCard from '../../components/AddressCard'
 import { RadioGroup } from '@headlessui/react'
 import Layout from '../../components/Layout'
 
 import { GetServerSideProps } from 'next'
-import { dehydrate, QueryClient, useQuery, useQueryClient } from 'react-query'
+import {
+	dehydrate,
+	QueryClient,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from 'react-query'
 import { authenticatedGraphQl } from '../../lib/helpers'
 
 import queries from '../../lib/graphql'
-
+import produce from 'immer'
 import AddressForm from '../../components/AddressForm'
 import camelCaseKeys from 'camelcase-keys'
-export default function Shipping() {
-	// const queryClient = useQueryClient()
-	const gqlClient = authenticatedGraphQl()
-	const { GET_ADDRESSES } = queries
+import { useDebouncedCallback } from 'use-debounce'
+import { IAddress } from '../../lib/types'
 
+export default function Shipping() {
+	const gqlClient = authenticatedGraphQl()
+	const { GET_ADDRESSES, CSRF, UPDATE_ADDRESS } = queries
+	const queryCache = useQueryClient()
+
+	const muatation = useMutation(
+		async (id: string) => {
+			const { _csrf } = await gqlClient.request(CSRF)
+
+			return await gqlClient.request(
+				UPDATE_ADDRESS,
+				{
+					address: {
+						is_shipping: true,
+					},
+					id,
+				},
+				{
+					'x-xsrf-token': _csrf,
+				}
+			)
+		},
+		{
+			onSuccess: (res) => {
+				// TODO communicate with strapi
+				fetch('/api/set-address', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				})
+				queryCache.setQueryData('user_addresses', (old) => {
+					return produce(old, (newState) => {
+						newState.me.addresses = newState.me.addresses.map((e) => {
+							const { attributes, id } = e
+							return {
+								id,
+								attributes: {
+									...attributes,
+									is_shipping:
+										res.updateAddress.data.id === id &&
+										res.updateAddress.data.attributes.is_shipping,
+								},
+							}
+						})
+					})
+				})
+			},
+		}
+	)
 	const { data: userAddresses } = useQuery(
 		'user_addresses',
 		async () => {
@@ -24,22 +78,39 @@ export default function Shipping() {
 		},
 		{ staleTime: 5000 }
 	)
+	// console.log(userAddresses)
+	console.log(userAddresses?.me?.addresses)
 
-	const addresses = useMemo(
-		() =>
-			camelCaseKeys(userAddresses?.me?.addresses, {
-				deep: true,
-			}).map((e) => {
-				const addressOne = e.attributes.address1
-				delete e.attributes['address1']
-				e.attributes['addressOne'] = addressOne
-				return e
-			}),
-		[userAddresses]
+	const addresses = useMemo(() => {
+		const camelAddresses = camelCaseKeys(userAddresses?.me?.addresses, {
+			deep: true,
+		}).map((e) => {
+			const addressOne = e.attributes.address1
+			delete e.attributes['address1']
+			e.attributes['addressOne'] = addressOne
+			return e
+		})
+		camelAddresses.sort((a, b) => a.id < b.id)
+		return camelAddresses
+	}, [userAddresses])
+
+	const [selected, setSelected] = useState(
+		addresses?.find((e) => {
+			return e.attributes.isShipping
+		})?.id
 	)
+	// console.log(addresses)
 
-	const [selected, setSelected] = useState(addresses[0].attributes)
+	const debouncedShipping = useDebouncedCallback((id) => {
+		muatation.mutate(id)
+	}, 1000)
 
+	useEffect(
+		() => () => {
+			debouncedShipping.flush()
+		},
+		[debouncedShipping]
+	)
 	// const [modalStatus, setModalStatus] = useState(-1)
 	return (
 		<Layout>
@@ -51,7 +122,10 @@ export default function Shipping() {
 					<RadioGroup
 						className="grid grid-cols-responsive-cols-sm gap-4 justify-center"
 						value={selected}
-						onChange={setSelected}
+						onChange={(e) => {
+							setSelected(e)
+							debouncedShipping(e)
+						}}
 					>
 						<RadioGroup.Label className="sr-only">
 							My addresses
@@ -70,7 +144,10 @@ export default function Shipping() {
 						<h2 className="font-semibold text-xl mb-4 text-slate-700 border-b-2 border-emerald-500 mr-auto md:mr-0">
 							New Address
 						</h2>
-						<AddressForm buttonText="Add Address" />
+						<AddressForm
+							buttonText="Add Address"
+							query={{ queryURL: queries.CREATE_ADDRESS }}
+						/>
 					</div>
 				</section>
 			</div>

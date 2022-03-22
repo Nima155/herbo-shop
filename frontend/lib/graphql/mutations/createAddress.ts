@@ -1,20 +1,21 @@
 import { gql } from 'graphql-request'
 
 export default gql`
-	query {
-		me {
-			addresses {
+	mutation CreateAddress($address: AddressInput!) {
+		createAddress(data: $address) {
+			data {
 				id
 				attributes {
-					city
 					address_1
-					zip_code
+					city
 					country
+					zip_code
+					phone_number
 					first_name
 					last_name
 					is_billing
 					state
-					phone_number
+					is_shipping
 				}
 			}
 		}

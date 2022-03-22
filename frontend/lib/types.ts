@@ -27,8 +27,8 @@ export interface IAddress {
 	city: string
 	zipCode: string
 	phoneNumber: string
-	isBilling: boolean
 	state: string
+	isShipping?: boolean
 }
 
 export interface ProductAttributes {

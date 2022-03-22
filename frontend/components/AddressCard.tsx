@@ -3,9 +3,16 @@ import { IAddress } from '../lib/types'
 
 import { Dialog, RadioGroup, Transition } from '@headlessui/react'
 import AddressForm from './AddressForm'
-
+import queries from '../lib/graphql'
+import styled from 'styled-components'
+const EllipsisParagraph = styled.p`
+	max-width: 260px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+`
 export default function AddressCard(props: {
-	addressDetails: IAddress
+	addressDetails: IAddress & { id?: string }
 	className?: string
 }) {
 	const { addressDetails, className } = props
@@ -15,7 +22,7 @@ export default function AddressCard(props: {
 	return (
 		<>
 			<RadioGroup.Option
-				value={addressDetails}
+				value={addressDetails.id}
 				disabled={modalStatus}
 				// className={`rounded-lg bg-white p-2 relative`}
 			>
@@ -33,14 +40,18 @@ export default function AddressCard(props: {
 									} rounded-full transition-colors`}
 								/>
 							</div>
-							<p>{addressDetails?.firstName}</p>
-							<p>{addressDetails?.lastName}</p>
-							<p>{addressDetails?.addressOne}</p>
-							<p>{addressDetails?.country}</p>
-							<p>{addressDetails?.state}</p>
-							<p>{addressDetails?.city}</p>
-							<p>{addressDetails?.zipCode}</p>
-							<p>{addressDetails?.phoneNumber}</p>
+							<EllipsisParagraph>{addressDetails?.firstName}</EllipsisParagraph>
+							<EllipsisParagraph>{addressDetails?.lastName}</EllipsisParagraph>
+							<EllipsisParagraph>
+								{addressDetails?.addressOne}
+							</EllipsisParagraph>
+							<EllipsisParagraph>{addressDetails?.country}</EllipsisParagraph>
+							<EllipsisParagraph>{addressDetails?.state}</EllipsisParagraph>
+							<EllipsisParagraph>{addressDetails?.city}</EllipsisParagraph>
+							<EllipsisParagraph>{addressDetails?.zipCode}</EllipsisParagraph>
+							<EllipsisParagraph>
+								{addressDetails?.phoneNumber}
+							</EllipsisParagraph>
 							<button
 								onClick={(e) => {
 									setModalStatus(true)
@@ -75,7 +86,17 @@ export default function AddressCard(props: {
 					<Dialog.Overlay className="fixed inset-0 bg-black/30" />
 
 					<div className="bg-white rounded-lg py-2 px-3 relative flex flex-col items-start">
-						<AddressForm address={addressDetails} buttonText="Apply Changes" />
+						<AddressForm
+							address={addressDetails}
+							buttonText="Apply Changes"
+							query={{
+								queryURL: queries.UPDATE_ADDRESS,
+								queryArgs: { id: addressDetails.id },
+							}}
+							closeModal={() => {
+								setModalStatus(false)
+							}}
+						/>
 					</div>
 				</Dialog>
 			</Transition>

@@ -1,6 +1,13 @@
 "use strict";
+const Stripe = require("stripe");
+
 const CSRF = require("koa-csrf");
 const csrfProtection = new CSRF();
+
+const stripe = new Stripe(process.env.STRIPE_TEST_API_KEY, {
+  apiVersion: "2020-08-27",
+});
+
 const MIDDLEWARES = [
   async (next, parent, args, context, info) => {
     csrfProtection(context.koaContext, () => {});
@@ -29,7 +36,31 @@ module.exports = {
           middlewares: MIDDLEWARES, // CSRF check
         },
         "Mutation.createAddress": {
-          middlewares: MIDDLEWARES, // CSRF check
+          middlewares: [...MIDDLEWARES], // CSRF check
+        },
+        "Mutation.updateAddress": {
+          middlewares: [
+            ...MIDDLEWARES,
+
+            async (next, parent, args, ctx, info) => {
+              if (!ctx.state.user.addresses.find((e) => e.id === +args.id)) {
+                throw new Error("You are trying to do something naughty!");
+              }
+              // console.log(args);
+              if (args.data.is_shipping) {
+                await strapi.db.query("api::address.address").updateMany({
+                  where: {
+                    id: ctx.state.user.addresses.map((e) => e.id),
+                  },
+                  data: {
+                    is_shipping: false,
+                  },
+                });
+              }
+              // console.log(ctx.state.user.addresses);
+              return await next(parent, args, ctx, info);
+            },
+          ], // CSRF check
         },
         "Query._csrf": {
           auth: false,
@@ -37,6 +68,36 @@ module.exports = {
       },
       resolvers: {
         Mutation: {
+          updateAddress: {
+            async resolve(_roots, args, ctx) {
+              const entry = await strapi.entityService.update(
+                "api::address.address",
+                args.id,
+                {
+                  data: args.data,
+                }
+              );
+
+              await stripe.customers.update(ctx.state.user.stripe_id, {
+                shipping: {
+                  name: `${entry.first_name} ${entry.last_name}`,
+                  phone: entry.phone_number,
+                  address: {
+                    city: entry.city,
+                    country: entry.country,
+                    line1: entry.address_1,
+                    postal_code: entry.zip_code,
+                    state: entry.state,
+                  },
+                },
+              });
+
+              return toEntityResponse(entry, {
+                args,
+                resourceUID: "api::address.address",
+              });
+            },
+          },
           createAddress: {
             async resolve(_rootz, args, ctx) {
               // console.log(strapi);
@@ -45,23 +106,13 @@ module.exports = {
                 throw new Error("You can only save up to 3 addresses.");
               }
 
-              if (args.data.is_billing) {
-                await strapi.db.query("api::address.address").updateMany({
-                  where: {
-                    id: ctx.state.user.addresses.map((e) => e.id),
-                  },
-                  data: {
-                    is_billing: false,
-                  },
-                });
-              }
-
               const entry = await strapi.entityService.create(
                 "api::address.address",
                 {
                   data: args.data,
                 }
               );
+
               await strapi.entityService.update(
                 "plugin::users-permissions.user",
                 ctx.state.user.id,
@@ -71,6 +122,22 @@ module.exports = {
                   },
                 }
               );
+
+              if (!ctx.state.user.addresses.length) {
+                await stripe.customers.update(ctx.state.user.stripe_id, {
+                  shipping: {
+                    name: `${entry.first_name} ${entry.last_name}`,
+                    phone: entry.phone_number,
+                    address: {
+                      city: entry.city,
+                      country: entry.country,
+                      line1: entry.address_1,
+                      postal_code: entry.zip_code,
+                      state: entry.state,
+                    },
+                  },
+                });
+              }
 
               return toEntityResponse(entry, {
                 args,

@@ -1,9 +1,10 @@
 import { gql } from 'graphql-request'
 
 export default gql`
-	mutation CreateAddress($address: AddressInput!) {
-		createAddress(data: $address) {
+	mutation UpdateAddress($address: AddressInput!, $id: ID!) {
+		updateAddress(data: $address, id: $id) {
 			data {
+				id
 				attributes {
 					address_1
 					city
@@ -13,6 +14,8 @@ export default gql`
 					first_name
 					last_name
 					is_billing
+					state
+					is_shipping
 				}
 			}
 		}

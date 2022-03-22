@@ -44,7 +44,7 @@ export default async function handler(
 
 		const session = await stripe.checkout.sessions.create({
 			payment_method_types: ['card'],
-			billing_address_collection: 'auto',
+			billing_address_collection: 'required',
 			shipping_address_collection: {
 				allowed_countries: ['US', 'CA'],
 			},
