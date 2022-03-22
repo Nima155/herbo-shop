@@ -295,6 +295,7 @@ export default function AddressForm(props: {
 									message: 'Missing phone number field',
 									value: true,
 								},
+								// TODO: fix duplication bug with edits..
 								setValueAs: (v) =>
 									`${
 										AVAILABLE_COUNTRIES.filter(
@@ -343,7 +344,9 @@ export default function AddressForm(props: {
 				</InputLabelWrapper> */}
 
 				{mutation.isLoading && <LoadingDots />}
-				<SubmitButton className="mb-2 mt-2">{buttonText}</SubmitButton>
+				<SubmitButton className="mb-2 mt-2 rounded-sm">
+					{buttonText}
+				</SubmitButton>
 			</form>
 		</div>
 	)

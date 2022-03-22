@@ -12,7 +12,7 @@ export default gql`
 					country
 					first_name
 					last_name
-					is_billing
+
 					state
 					phone_number
 					is_shipping

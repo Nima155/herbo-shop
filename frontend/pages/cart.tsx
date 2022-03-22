@@ -60,14 +60,14 @@ export default function Cart() {
 								).json()
 								await redirectToCheckout({ sessionId: id })
 							}}
-							className="self-stretch"
+							className="self-stretch rounded-sm"
 						>
 							Checkout
 						</SubmitButton>
 						<Button
 							onClick={() => clearCart()}
 							type="button"
-							className="bg-slate-500 hover:bg-slate-700 self-stretch text-gray-100 transition-colors py-1 px-7 duration-150 ease-in"
+							className="bg-slate-500 hover:bg-slate-700 self-stretch text-gray-100 transition-colors py-1 px-7 duration-150 ease-in rounded-sm"
 						>
 							Clear
 						</Button>

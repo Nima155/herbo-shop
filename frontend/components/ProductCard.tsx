@@ -48,7 +48,7 @@ export default function ProductCard({
 			</Carousel>
 
 			<Button
-				className="bg-emerald-500 text-slate-100 px-1 py-2 shadow-md mt-auto gap-2"
+				className="bg-emerald-500 text-slate-100 px-1 py-2 shadow-md mt-auto gap-2 rounded-sm"
 				whileTap={{ scale: 0.96 }}
 				whileHover={{ scale: 1.08 }}
 				animate={isPressed ? { scale: 0.96 } : { scale: 1 }}

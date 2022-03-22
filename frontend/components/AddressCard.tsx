@@ -6,7 +6,7 @@ import AddressForm from './AddressForm'
 import queries from '../lib/graphql'
 import styled from 'styled-components'
 const EllipsisParagraph = styled.p`
-	max-width: 260px;
+	max-width: 210px;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;

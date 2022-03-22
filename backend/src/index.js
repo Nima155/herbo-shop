@@ -106,6 +106,10 @@ module.exports = {
                 throw new Error("You can only save up to 3 addresses.");
               }
 
+              if (!ctx.state.user.addresses.length) {
+                args.data.is_shipping = true;
+              }
+
               const entry = await strapi.entityService.create(
                 "api::address.address",
                 {

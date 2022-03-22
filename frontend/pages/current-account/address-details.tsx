@@ -79,7 +79,6 @@ export default function Shipping() {
 		{ staleTime: 5000 }
 	)
 	// console.log(userAddresses)
-	console.log(userAddresses?.me?.addresses)
 
 	const addresses = useMemo(() => {
 		const camelAddresses = camelCaseKeys(userAddresses?.me?.addresses, {
@@ -111,10 +110,19 @@ export default function Shipping() {
 		},
 		[debouncedShipping]
 	)
+
+	useEffect(() => {
+		setSelected(
+			addresses?.find((e) => {
+				return e.attributes.isShipping
+			})?.id
+		)
+	}, [addresses])
+
 	// const [modalStatus, setModalStatus] = useState(-1)
 	return (
 		<Layout>
-			<div className="md:px-8 py-2 grid grid-rows-2 md:grid-cols-2 md:grid-rows-none gap-2">
+			<div className="py-2 flex flex-col gap-4 md:gap-2 md:grid md:grid-cols-2 md:grid-rows-none md:px-8">
 				<section>
 					<h2 className="font-semibold text-xl mb-4 text-slate-700 border-b-2 border-emerald-500 inline-block">
 						Addresses
