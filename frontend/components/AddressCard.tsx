@@ -81,11 +81,12 @@ export default function AddressCard(props: {
 					onClose={() => {
 						setModalStatus(false)
 					}}
+					as="div"
 					className="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center"
 				>
 					<Dialog.Overlay className="fixed inset-0 bg-black/30" />
 
-					<div className="bg-white rounded-lg py-2 px-3 relative flex flex-col items-start">
+					<div className="bg-white rounded-lg py-2 px-3 relative flex flex-col items-start ring-inset ring-emerald-200 ring-2">
 						<AddressForm
 							address={addressDetails}
 							buttonText="Apply Changes"
