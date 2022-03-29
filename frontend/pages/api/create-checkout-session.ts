@@ -16,7 +16,7 @@ export default async function handler(
 	// Check for secret to confirm this is a valid request
 
 	if (req.method === 'POST') {
-		const { stripeId, ...rest } = req.body
+		const { stripeId, userId, ...rest } = req.body
 
 		// if (stripeId)
 		const databaseItems: {
@@ -65,6 +65,9 @@ export default async function handler(
 					},
 				},
 			],
+			metadata: {
+				userId,
+			},
 			mode: 'payment',
 			/*
 			 * This env var is set by Netlify and inserts the live site URL. If you want

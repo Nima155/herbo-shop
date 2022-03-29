@@ -13,7 +13,6 @@ export default gql`
 					phone_number
 					first_name
 					last_name
-
 					state
 					is_shipping
 				}

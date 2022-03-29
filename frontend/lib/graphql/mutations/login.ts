@@ -8,6 +8,7 @@ export default gql`
 				confirmed
 				blocked
 				stripe_id
+				id
 			}
 		}
 	}

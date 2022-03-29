@@ -10,11 +10,17 @@ import RESET_PASSWORD from './mutations/resetPassword'
 import CREATE_ADDRESS from './mutations/createAddress'
 import GET_ADDRESSES from './queries/userAddresses'
 import UPDATE_ADDRESS from './mutations/updateAddress'
+import DELETE_ADDRESS from './mutations/deleteAddress'
+import CREATE_ORDER from './mutations/createOrder'
+import CREATE_ORDER_LISTS from './mutations/createOrderLists'
 const exports = {
+	CREATE_ORDER_LISTS,
+	DELETE_ADDRESS,
 	CSRF,
 	LOGIN,
 	USER_INFO,
 	FORGOT_PASSWORD,
+	CREATE_ORDER,
 	LOGOUT,
 	REGISTER,
 	CONFIRM_EMAIL,

@@ -1,4 +1,4 @@
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useFieldArray, useFormContext } from 'react-hook-form'
 import { useMutation, useQueryClient } from 'react-query'
 import { AVAILABLE_COUNTRIES } from '../lib/constants'
 import { authenticatedGraphQl } from '../lib/helpers'
@@ -10,7 +10,6 @@ import SubmitButton from './Input/SubmitButton'
 import LoadingDots from './LoadingDots'
 import queries from '../lib/graphql'
 import produce from 'immer'
-import useAddressForm from '../lib/useAddressForm'
 
 const { CSRF } = queries
 
@@ -19,59 +18,31 @@ export default function AddressForm(props: {
 	address?: IAddress & { id?: string }
 	query: { queryURL: string; queryArgs?: any }
 	closeModal?: () => void
+	index: number
 }) {
 	const {
 		query,
 		buttonText,
 		address: { id: addressId = '', ...rest } = {},
+		index,
 	} = props
 
-	const queryClient = useQueryClient()
 	const {
-		useFieldArrayObj: { append, fields },
-		useFormObj: {
-			register,
-			formState: { errors },
-			handleSubmit,
-			watch,
-			setError,
-			clearErrors,
-			reset,
-		},
-		// register,
-		// formState: { errors },
-		// handleSubmit,
-		// watch,
-		// setError,
-		// clearErrors,
-		// reset,
-	} = useAddressForm()
+		register,
+		formState: { errors },
+		handleSubmit,
+		watch,
+		clearErrors,
+		reset,
+		control,
+	} = useFormContext<{ addressForms: IAddress[] }>()
 
-	// useForm<{ addressForms: IAddress[] }>({
-	// 	reValidateMode: 'onSubmit',
-	// 	defaultValues: {
-	// 		addressForms: [
-	// 			{
-	// 				...rest,
-	// 				...(props.address && {
-	// 					phoneNumber: rest?.phoneNumber.slice(
-	// 						AVAILABLE_COUNTRIES.find(
-	// 							(e) => e.value === rest?.country
-	// 						)?.phoneCode.toString().length
-	// 					),
-	// 				}),
-	// 			},
-	// 		],
-	// 	},
-	// })
+	const { fields, append } = useFieldArray({
+		name: 'addressForms',
+		control,
+	})
 
-	// console.log(
-	// 	fields.map((i) => {
-	// 		console.log(i)
-	// 	})
-	// )
-
-	// const [isDefault, _] = useState(address?.isBilling)
+	const queryClient = useQueryClient()
 
 	const gqlClient = authenticatedGraphQl()
 
@@ -136,251 +107,257 @@ export default function AddressForm(props: {
 		}
 	)
 
-	const onAddressCreate = (data: IAddress) => {
-		mutation.mutate(data)
+	const onAddressCreate = (data: { addressForms: IAddress[] }) => {
+		mutation.mutate(data.addressForms[index])
 	}
 
-	const chosenCountry = watch('country')
+	// console.log(chosenCountry, index)
+	const chosenCountry = watch(`addressForms.${index}.country`)
 
 	return (
 		<div className="relative w-full">
-			<form
-				className={`flex flex-col gap-2 w-full mb-2`}
-				onSubmit={handleSubmit(onAddressCreate)}
-			>
-				{fields.map((field, i) => {
-					console.log(field.id)
-
-					// return (
-					// 	<input
-					// 		key={field.id}
-					// 		{...register(`test.${i}.firstName` as const)}
-					// 	/>
-					// )
-					return (
-						<>
-							<InputLabelWrapper>
-								<Label htmlFor="first_name">First Name</Label>
-								<Input
-									type="text"
-									id="first_name"
-									{...register('firstName', {
-										required: { message: 'Missing name field', value: true },
-										onChange: () => {
-											clearErrors('firstName')
-										},
-									})}
-								/>
-								{errors.firstName && (
-									<span className="text-red-800 text-xs">
-										{errors.firstName.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-							<InputLabelWrapper>
-								<Label htmlFor={`last_name`}>Last Name</Label>
-								<Input
-									type="text"
-									id={`last_name`}
-									{...register('lastName', {
-										required: {
-											message: 'Missing last name field',
-											value: true,
-										},
-										onChange: () => {
-											clearErrors('lastName')
-										},
-									})}
-								/>
-								{errors.lastName && (
-									<span className="text-red-800 text-xs">
-										{errors.lastName.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-							<InputLabelWrapper>
-								<Label htmlFor="address">Address</Label>
-								<Input
-									type="text"
-									id="address"
-									{...register('addressOne', {
-										required: { message: 'Missing address field', value: true },
-										onChange: () => {
-											clearErrors('addressOne')
-										},
-									})}
-								/>
-								{errors.addressOne && (
-									<span className="text-red-800 text-xs">
-										{errors.addressOne.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-
-							<InputLabelWrapper>
-								<Label htmlFor="country" className="sr-only">
-									Country
-								</Label>
-								<select
-									id="country"
-									className="p-2 rounded-sm text-slate-700"
-									{...register('country', {
-										required: { message: 'missing country field', value: true },
-										onChange: () => {
-											clearErrors('country')
-										},
-									})}
-									defaultValue=""
-								>
-									<option value="">Select Country</option>
-									{AVAILABLE_COUNTRIES.map(
-										({ value: name, code: countryCode, map: mapEmoji }) => (
-											<option value={countryCode} key={countryCode}>
-												{`${mapEmoji} ${name}`}
-											</option>
-										)
-									)}
-								</select>
-								{errors.country && (
-									<span className="text-red-800 text-xs">
-										{errors.country.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-							<InputLabelWrapper>
-								<Label htmlFor="state">State / Region</Label>
-								<Input
-									type="text"
-									id="state"
-									{...register('state', {
-										required: {
-											message: 'Missing state/region field',
-											value: true,
-										},
-										onChange: () => {
-											clearErrors('state')
-										},
-									})}
-								/>
-								{errors.state && (
-									<span className="text-red-800 text-xs">
-										{errors.state.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-							<InputLabelWrapper>
-								<Label htmlFor="city">City</Label>
-								<Input
-									type="text"
-									id="city"
-									{...register('city', {
-										required: { message: 'Missing city field', value: true },
-										onChange: () => {
-											clearErrors('city')
-										},
-									})}
-								/>
-								{errors.city && (
-									<span className="text-red-800 text-xs">
-										{errors.city.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-
-							<InputLabelWrapper>
-								<Label htmlFor="zip_code">Postal / Zip Code</Label>
-								<Input
-									type="text"
-									id="zip_code"
-									{...register('zipCode', {
-										required: {
-											message: 'Missing zip code field',
-											value: true,
-										},
-										onChange: () => {
-											clearErrors('zipCode')
-										},
-									})}
-								/>
-								{errors.zipCode && (
-									<span className="text-red-800 text-xs">
-										{errors.zipCode.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-							<InputLabelWrapper>
-								<Label htmlFor="phone_number">Phone Number</Label>
-								<div className="flex gap-2">
-									<span className="bg-slate-300/60 p-1 text-slate-700 flex items-center rounded-sm">
-										+
-										{AVAILABLE_COUNTRIES.filter(
-											(e) => e.code === chosenCountry
-										)[0]?.phoneCode || '00'}
-									</span>
-									<Input
-										type="text"
-										id="phone_number"
-										{...register('phoneNumber', {
-											required: {
-												message: 'Missing phone number field',
-												value: true,
-											},
-											// TODO: fix duplication bug with edits..
-											setValueAs: (v) =>
-												`${
-													AVAILABLE_COUNTRIES.filter(
-														(e) => e.code === chosenCountry
-													)[0]?.phoneCode
-												}${v}`,
-											onChange: () => {
-												clearErrors('phoneNumber')
-											},
-										})}
-										className="flex-grow"
-									/>
-								</div>
-								{errors.phoneNumber && (
-									<span className="text-red-800 text-xs">
-										{errors?.phoneNumber.message}
-									</span>
-								)}
-							</InputLabelWrapper>
-						</>
-					)
-				})}
-				{/* <InputLabelWrapper>
-					<div>
-						<input
-							type="checkbox"
-							id={`billingBox ${addressId}`}
-							className="peer sr-only"
-							{...register('isBilling')}
-						/>
-						<Label
-							className="flex items-center normal-case cursor-pointer rounded-md
-							before:content-[''] before:h-5 before:w-5 before:border-2 
-							before:mr-2 before:border-slate-300 
-							before:rounded-md before:peer-checked:content-['\2713'] 
-							before:flex before:items-center before:justify-center 
-							peer-focus-visible:ring-[#059669]/40 
-							peer-focus-visible:ring-1 peer-focus-visible:ring-offset-2"
-							htmlFor={`billingBox ${addressId}`}
-						>
-							Set as default billing address
+			<form onSubmit={handleSubmit(onAddressCreate)}>
+				<div
+					className={`flex flex-col gap-2 w-full mb-2`}
+					key={fields[index]?.id}
+				>
+					<InputLabelWrapper>
+						<Label htmlFor={`addressForms.${index}.firstName`}>
+							First Name
 						</Label>
-					</div>
-					{errors.isBilling && (
-						<span className="text-red-800 text-xs">
-							{errors?.isBilling.message}
-						</span>
-					)}
-				</InputLabelWrapper> */}
+						<Input
+							type="text"
+							id={`addressForms.${index}.firstName`}
+							{...register(`addressForms.${index}.firstName` as const, {
+								required: { message: 'Missing name field', value: !index },
+								onChange: () => {
+									clearErrors(`addressForms.${index}.firstName`)
+								},
+							})}
+							defaultValue=""
+						/>
+						{errors?.addressForms?.[index]?.firstName && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.firstName?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
+					<InputLabelWrapper>
+						<Label htmlFor={`addressForms.${index}.lastName`}>Last Name</Label>
+						<Input
+							type="text"
+							id={`addressForms.${index}.lastName`}
+							{...register(`addressForms.${index}.lastName` as const, {
+								required: {
+									message: 'Missing last name field',
+									value: !index,
+								},
+								onChange: () => {
+									clearErrors(`addressForms.${index}.lastName`)
+								},
+							})}
+							defaultValue=""
+						/>
+						{errors?.addressForms?.[index]?.lastName && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.lastName?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
+					<InputLabelWrapper>
+						<Label htmlFor={`addressForms.${index}.addressOne`}>Address</Label>
+						<Input
+							type="text"
+							id={`addressForms.${index}.addressOne`}
+							{...register(`addressForms.${index}.addressOne` as const, {
+								required: { message: 'Missing address field', value: !index },
+								onChange: () => {
+									clearErrors(`addressForms.${index}.addressOne`)
+								},
+							})}
+							defaultValue=""
+						/>
+						{errors?.addressForms?.[index]?.addressOne && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.addressOne?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
+					<InputLabelWrapper>
+						<Label
+							htmlFor={`addressForms.${index}.country`}
+							className="sr-only"
+						>
+							Country
+						</Label>
+						<select
+							id={`addressForms.${index}.country`}
+							className="p-2 rounded-sm text-slate-700"
+							{...register(`addressForms.${index}.country` as const, {
+								required: { message: 'Missing country field', value: !index },
+								onChange: () => {
+									clearErrors(`addressForms.${index}.country`)
+								},
+							})}
+							defaultValue=""
+						>
+							<option value="">Select Country</option>
+							{AVAILABLE_COUNTRIES.map(
+								({ value: name, code: countryCode, map: mapEmoji }) => (
+									<option value={countryCode} key={countryCode}>
+										{`${mapEmoji} ${name}`}
+									</option>
+								)
+							)}
+						</select>
+						{errors?.addressForms?.[index]?.country && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.country?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
+					<InputLabelWrapper>
+						<Label htmlFor={`addressForms.${index}.state`}>
+							State / Region
+						</Label>
+						<Input
+							type="text"
+							id={`addressForms.${index}.state`}
+							{...register(`addressForms.${index}.state` as const, {
+								required: {
+									message: 'Missing state / region field',
+									value: !index,
+								},
+								onChange: () => {
+									clearErrors(`addressForms.${index}.state`)
+								},
+							})}
+							defaultValue=""
+						/>
+						{errors?.addressForms?.[index]?.state && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.state?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
+					<InputLabelWrapper>
+						<Label htmlFor={`addressForms.${index}.city`}>City</Label>
+						<Input
+							type="text"
+							id={`addressForms.${index}.city`}
+							{...register(`addressForms.${index}.city` as const, {
+								required: { message: 'Missing city field', value: !index },
+								onChange: () => {
+									clearErrors(`addressForms.${index}.city`)
+								},
+							})}
+							defaultValue=""
+						/>
+						{errors?.addressForms?.[index]?.city && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.city?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
+					<InputLabelWrapper>
+						<Label htmlFor={`addressForms.${index}.zipCode`}>
+							Postal / Zip Code
+						</Label>
+						<Input
+							type="text"
+							id={`addressForms.${index}.zipCode`}
+							{...register(`addressForms.${index}.zipCode` as const, {
+								required: {
+									message: 'Missing zip code field',
+									value: !index,
+								},
+								onChange: () => {
+									clearErrors(`addressForms.${index}.zipCode`)
+								},
+							})}
+							defaultValue=""
+						/>
+						{errors?.addressForms?.[index]?.zipCode && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.zipCode?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
+					<InputLabelWrapper>
+						<Label htmlFor={`addressForms.${index}.phoneNumber`}>
+							Phone Number
+						</Label>
+						<div className="flex gap-2">
+							<span className="bg-slate-300/60 p-1 text-slate-700 flex items-center rounded-sm">
+								+
+								{AVAILABLE_COUNTRIES.filter((e) => e.code === chosenCountry)[0]
+									?.phoneCode || '00'}
+							</span>
+							<Input
+								type="text"
+								id={`addressForms.${index}.phoneNumber`}
+								{...register(`addressForms.${index}.phoneNumber` as const, {
+									required: {
+										message: 'Missing phone number field',
+										value: !index,
+									},
+									// TODO: fix duplication bug with edits..
+									setValueAs: (v) =>
+										v &&
+										`${
+											AVAILABLE_COUNTRIES.filter(
+												(e) => e.code === chosenCountry
+											)[0]?.phoneCode
+										}${v}`,
+									onChange: () => {
+										clearErrors(`addressForms.${index}.phoneNumber`)
+									},
+								})}
+								defaultValue=""
+								className="flex-grow"
+							/>
+						</div>
+						{errors?.addressForms?.[index]?.phoneNumber && (
+							<span className="text-red-800 text-xs">
+								{errors?.addressForms?.[index]?.phoneNumber?.message}
+							</span>
+						)}
+					</InputLabelWrapper>
 
-				{mutation.isLoading && <LoadingDots />}
-				<SubmitButton className="mb-2 mt-2 rounded-sm">
-					{buttonText}
-				</SubmitButton>
+					{mutation.isLoading && <LoadingDots />}
+					<SubmitButton className="mb-2 mt-2 rounded-sm">
+						{buttonText}
+					</SubmitButton>
+				</div>
 			</form>
 		</div>
 	)
 }
+
+/* <InputLabelWrapper>
+	<div>
+		<input
+			type="checkbox"
+			id={`billingBox ${addressId}`}
+			className="peer sr-only"
+			{...register('isBilling')}
+		/>
+		<Label
+			className="flex items-center normal-case cursor-pointer rounded-md
+			before:content-[''] before:h-5 before:w-5 before:border-2
+			before:mr-2 before:border-slate-300
+			before:rounded-md before:peer-checked:content-['\2713']
+			before:flex before:items-center before:justify-center
+			peer-focus-visible:ring-[#059669]/40
+			peer-focus-visible:ring-1 peer-focus-visible:ring-offset-2"
+			htmlFor={`billingBox ${addressId}`}
+		>
+			Set as default billing address
+		</Label>
+	</div>
+	{errors.isBilling && (
+		<span className="text-red-800 text-xs">
+			{errors?.isBilling.message}
+		</span>
+	)}
+</InputLabelWrapper> */

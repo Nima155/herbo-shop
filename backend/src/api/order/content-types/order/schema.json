@@ -12,7 +12,7 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "user_ref": {
+    "user": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
@@ -25,10 +25,6 @@
         "shipped"
       ],
       "default": "processing",
-      "required": true
-    },
-    "order_date": {
-      "type": "date",
       "required": true
     },
     "total_cost": {

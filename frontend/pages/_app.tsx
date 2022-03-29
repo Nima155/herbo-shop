@@ -3,7 +3,7 @@ import { Hydrate, QueryClient, QueryClientProvider } from 'react-query'
 import { ReactQueryDevtools } from 'react-query/devtools'
 import type { AppProps, NextWebVitalsMetric } from 'next/app'
 import { useState } from 'react'
-import { CartProvider } from 'use-shopping-cart/react'
+import { CartProvider } from 'use-shopping-cart'
 import Header from '../components/Header'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import React from 'react'
@@ -20,6 +20,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 			// successUrl="http://localhost:3000/"
 			// cancelUrl="http://localhost:3000/current-account/cart"
 			currency="USD"
+
 			// allowedCountries={['US', 'GB', 'CA']}
 			// billingAddressCollection={true}
 		>

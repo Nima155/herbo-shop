@@ -1,10 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import getRawBody from 'raw-body'
-
+import queries from '../../lib/graphql'
 import Stripe from 'stripe'
+import request from 'graphql-request'
 const stripe = new Stripe(process.env.STRIPE_TEST_API_KEY!, {
 	apiVersion: '2020-08-27',
 })
+
+const { CREATE_ORDER, CREATE_ORDER_LISTS } = queries
 
 export default async function handler(
 	req: NextApiRequest,
@@ -44,10 +47,48 @@ export default async function handler(
 				const sess = await stripe.checkout.sessions.retrieve(
 					completedSession.id,
 					{
-						expand: ['line_items'],
+						expand: ['line_items', 'line_items.data.price.product'],
 					}
 				)
-				console.log(sess, sess.line_items?.data)
+				console.log({
+					data: {
+						user: sess.metadata?.userId,
+						status: 'processing',
+						total_cost: sess.amount_total! / 100,
+					},
+				})
+
+				const order = await request(
+					process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
+					CREATE_ORDER,
+					{
+						data: {
+							user: sess.metadata?.userId,
+							status: 'processing',
+							total_cost: sess.amount_total! / 100,
+						},
+					}
+				)
+
+				// console.log(order.createOrder.data.id) // order id
+				await request(
+					process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
+					CREATE_ORDER_LISTS,
+					{
+						data: sess.line_items?.data.map(({ price, quantity }) => ({
+							quantity,
+							product: (price?.product as Stripe.Product).metadata.id,
+							order: order.createOrder.data.id,
+						})),
+					}
+				)
+				// console.log(
+				// 	await stripe.products.list()
+				// 	// 	sess.line_items?.data.map((prod) => prod.price?.product as string)
+				// )
+
+				// console.log(sess, 'heyyyy there')
+				// console.log(mappedProducts)
 
 				break
 

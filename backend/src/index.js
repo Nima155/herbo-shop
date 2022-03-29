@@ -1,6 +1,6 @@
 "use strict";
-const Stripe = require("stripe");
 
+const Stripe = require("stripe");
 const CSRF = require("koa-csrf");
 const csrfProtection = new CSRF();
 
@@ -36,7 +36,18 @@ module.exports = {
           middlewares: MIDDLEWARES, // CSRF check
         },
         "Mutation.createAddress": {
-          middlewares: [...MIDDLEWARES], // CSRF check
+          middlewares: MIDDLEWARES, // CSRF check
+        },
+        "Mutation.deleteAddress": {
+          middlewares: [
+            ...MIDDLEWARES,
+            async (next, parent, args, ctx, info) => {
+              if (!ctx.state.user.addresses.find((e) => e.id === +args.id)) {
+                throw new Error("You are trying to do something naughty!");
+              }
+              return await next(parent, args, ctx, info);
+            },
+          ],
         },
         "Mutation.updateAddress": {
           middlewares: [
@@ -63,6 +74,9 @@ module.exports = {
           ], // CSRF check
         },
         "Query._csrf": {
+          auth: false,
+        },
+        "Mutation.createOrderLists": {
           auth: false,
         },
       },
@@ -152,6 +166,12 @@ module.exports = {
         },
       },
       types: [
+        nexus.objectType({
+          name: "BatchReturn",
+          definition(t) {
+            t.int("count");
+          },
+        }),
         nexus.extendInputType({
           type: "UsersPermissionsRegisterInput",
           definition(t) {
@@ -188,6 +208,27 @@ module.exports = {
                 });
                 // ctx.cookies.set("token");
                 return "successful logout";
+              },
+            });
+            t.field("createOrderLists", {
+              type: "BatchReturn",
+              args: {
+                data: nexus.nonNull(
+                  nexus.list(nexus.nonNull("OrderListInput"))
+                ),
+              },
+              async resolve(_rootz, args, ctx) {
+                // ctx.cookies.set("token");
+
+                const allUpdates = await Promise.all(
+                  args.data.map((e) =>
+                    strapi.entityService.create("api::order-list.order-list", {
+                      data: e,
+                    })
+                  )
+                );
+
+                return { count: allUpdates.length };
               },
             });
           },

@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useLayoutEffect } from 'react'
-import { useShoppingCart } from 'use-shopping-cart/react'
+import { useShoppingCart } from 'use-shopping-cart'
 import Image from 'next/image'
 
 import { motion } from 'framer-motion'

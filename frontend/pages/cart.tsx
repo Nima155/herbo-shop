@@ -2,7 +2,7 @@ import { GetServerSideProps } from 'next'
 import React from 'react'
 import { AnimatePresence, LayoutGroup, Reorder, motion } from 'framer-motion'
 import { dehydrate, QueryClient } from 'react-query'
-import { useShoppingCart } from 'use-shopping-cart/react'
+import { useShoppingCart } from 'use-shopping-cart'
 import Layout from '../components/Layout'
 import { authenticatedGraphQl } from '../lib/helpers'
 import useUser from '../lib/useUser'
@@ -55,6 +55,7 @@ export default function Cart() {
 										body: JSON.stringify({
 											...cartDetails,
 											stripeId: user.me.stripe_id,
+											userId: user.me.id,
 										}),
 									})
 								).json()

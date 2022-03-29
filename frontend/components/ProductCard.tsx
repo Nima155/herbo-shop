@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { ProductAttributes } from '../lib/types'
 import Image from 'next/image'
 import Button from './Button'
-import { useShoppingCart, formatCurrencyString } from 'use-shopping-cart/react'
+import { useShoppingCart, formatCurrencyString } from 'use-shopping-cart'
 import Carousel from './Carousel'
 import Toast, { useToastStore } from './ToastNotifications'
 
@@ -70,6 +70,12 @@ export default function ProductCard({
 						description: productDetails.description,
 						id: productDetails.id,
 						price: productDetails.price,
+
+						product_data: {
+							metadata: {
+								id: productDetails.id,
+							},
+						},
 					})
 					addToast({
 						id: `${productDetails.id} ${Date.now()}`,

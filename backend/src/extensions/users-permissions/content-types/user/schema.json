@@ -63,12 +63,6 @@
       "inversedBy": "users",
       "configurable": false
     },
-    "orders": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::order.order",
-      "mappedBy": "user_ref"
-    },
     "addresses": {
       "type": "relation",
       "relation": "oneToMany",
@@ -78,6 +72,12 @@
       "type": "string",
       "required": true,
       "unique": true
+    },
+    "orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order.order",
+      "mappedBy": "user"
     }
   }
 }

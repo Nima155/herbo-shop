@@ -10,7 +10,7 @@ import { useMutation, useQueryClient } from 'react-query'
 import { authenticatedGraphQl } from '../lib/helpers'
 import Register from './Register'
 import Image from 'next/image'
-import { useShoppingCart } from 'use-shopping-cart/react'
+import { useShoppingCart } from 'use-shopping-cart'
 import Link from 'next/link'
 
 function CartButton() {
