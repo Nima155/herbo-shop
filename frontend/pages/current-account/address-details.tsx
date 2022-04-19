@@ -130,15 +130,12 @@ export default function Shipping() {
 	// ${
 	// 	addresses.length ? 'grid-cols-3' : 'grid-cols-1'
 	// }
-	console.log()
 
 	return (
 		<Layout>
 			<FormProvider {...formObj}>
 				<div
-					className={`py-2 flex flex-col gap-4 md:gap-2 md:grid md:${
-						addresses.length ? 'grid-cols-2' : 'grid-cols-1'
-					} md:grid-rows-none md:px-8`}
+					className={`py-2 flex flex-col-reverse gap-4  md:gap-2 md:flex-row md:px-8`}
 				>
 					{addresses.length ? (
 						<section>

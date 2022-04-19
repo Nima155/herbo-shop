@@ -9,24 +9,17 @@ import SubmitButton from './Input/SubmitButton'
 import { useForm } from 'react-hook-form'
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
-import validator from 'validator'
 import { useMutation } from 'react-query'
 import Image from 'next/image'
 import request from 'graphql-request'
 import LoadingDots from './LoadingDots'
+import { PASSWORD_STRENGTH_OPTIONS } from '../lib/constants'
 
 type RegistrationForm = {
 	username: string
 	email: string
 	password: string
 	confirmPassword: string
-}
-const PASSWORD_STRENGTH_OPTIONS: validator.strongPasswordOptions = {
-	minNumbers: 1,
-	minLength: 8,
-	minLowercase: 1,
-	minUppercase: 1,
-	minSymbols: 0,
 }
 
 export default function Register() {

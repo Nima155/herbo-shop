@@ -1,3 +1,11 @@
+import validator from 'validator'
+export const PASSWORD_STRENGTH_OPTIONS: validator.strongPasswordOptions = {
+	minNumbers: 1,
+	minLength: 8,
+	minLowercase: 1,
+	minUppercase: 1,
+	minSymbols: 0,
+}
 export const AVAILABLE_COUNTRIES = [
 	{
 		code: 'AF',

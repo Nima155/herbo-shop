@@ -13,7 +13,11 @@ import UPDATE_ADDRESS from './mutations/updateAddress'
 import DELETE_ADDRESS from './mutations/deleteAddress'
 import CREATE_ORDER from './mutations/createOrder'
 import CREATE_ORDER_LISTS from './mutations/createOrderLists'
+import ORDERS from './queries/orders'
+import CATEGORIES from './queries/categories'
 const exports = {
+	CATEGORIES,
+	ORDERS,
 	CREATE_ORDER_LISTS,
 	DELETE_ADDRESS,
 	CSRF,

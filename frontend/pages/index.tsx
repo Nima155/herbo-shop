@@ -1,18 +1,91 @@
-import type { GetServerSideProps, NextPage } from 'next'
+import type { GetServerSideProps } from 'next'
 import Head from 'next/head'
-import { dehydrate, QueryClient } from 'react-query'
+import { dehydrate, QueryClient, useInfiniteQuery } from 'react-query'
 import Layout from '../components/Layout'
-import Toast, { useToastStore } from '../components/ToastNotifications'
+
 import queries from '../lib/graphql'
 import { authenticatedGraphQl } from '../lib/helpers'
 import ProductCard from '../components/ProductCard'
-import { LayoutGroup, motion, AnimatePresence } from 'framer-motion'
-import ReactDOM from 'react-dom'
 
-const Home: NextPage<{ products: { products: { data: any } } }> = ({
-	products,
-}) => {
+import useInView from '../lib/useInView'
+import { RefObject, useEffect, useState } from 'react'
+import { request } from 'graphql-request'
+import { LayoutGroup, motion } from 'framer-motion'
+
+function FilterAccordion() {
+	const [show, setShow] = useState(false)
+	return (
+		<motion.div
+			className="flex justify-center flex-col items-center"
+			layout="position"
+		>
+			<button onClick={() => setShow((e) => !e)}>
+				<motion.svg
+					id="i-filter"
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 32 32"
+					width="32"
+					height="32"
+					fill="none"
+					stroke="currentcolor"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					strokeWidth="2"
+					whileHover={{ scale: 1.2 }}
+				>
+					<path d="M2 5 C2 5 6 3 16 3 26 3 30 5 30 5 L19 18 19 27 13 30 13 18 2 5Z" />
+				</motion.svg>
+			</button>
+			{show && (
+				<motion.div
+					layout
+					initial={{ height: 0, opacity: 0 }}
+					animate={{ height: 'auto', opacity: 1 }}
+				>
+					hi
+				</motion.div>
+			)}
+		</motion.div>
+	)
+}
+
+const LIMIT = 6
+const Home = () => {
 	// console.log(products.products.data)
+
+	const [ref, inView] = useInView()
+	const [categories, setCategories] = useState([])
+	const { PRODUCTS } = queries
+	// console.log(products.products)
+
+	const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery(
+		'products',
+		async ({ pageParam = 0 }) => {
+			return await request(
+				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
+				PRODUCTS,
+				{
+					pagination: { start: pageParam, limit: LIMIT },
+				}
+			)
+		},
+		{
+			getNextPageParam: (lastCount) => {
+				return lastCount.products.meta.pagination.page <
+					lastCount.products.meta.pagination.pageCount
+					? lastCount.products.meta.pagination.page *
+							lastCount.products.meta.pagination.pageSize
+					: undefined
+			},
+		}
+	)
+
+	useEffect(() => {
+		if (inView && hasNextPage) {
+			fetchNextPage()
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [inView])
 
 	return (
 		<>
@@ -23,23 +96,54 @@ const Home: NextPage<{ products: { products: { data: any } } }> = ({
 			</Head>
 
 			<Layout>
-				<ul className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4">
-					{products.products.data.map(({ attributes, id }: any) => {
-						// console.log(attributes)
-
-						return (
-							<ProductCard
-								key={attributes.name}
-								productDetails={{ id, ...attributes }}
-							/>
-						)
-					})}
-				</ul>
+				<LayoutGroup>
+					<FilterAccordion />
+					<motion.ul
+						className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
+						layout="position"
+					>
+						{data?.pages
+							.map((e) => e.products.data)
+							.flat()
+							.map(({ attributes, id }: any) => {
+								return (
+									<ProductCard
+										key={attributes.name}
+										productDetails={{ id, ...attributes }}
+									/>
+								)
+							})}
+					</motion.ul>
+				</LayoutGroup>
+				{/* loading logic */}
+				{!isLoading && !hasNextPage && (
+					<motion.div
+						className="flex justify-center bg-slate-200 p-5 m-5 text-slate-600/75 shadow-md rounded-md"
+						initial={{ opacity: 0, scale: 0 }}
+						whileInView={{ opacity: 1, scale: 1 }}
+						viewport={{ once: true }}
+					>
+						You've reached the end!
+					</motion.div>
+				)}
+				<div
+					className="h-1 bg-transparent"
+					ref={ref as RefObject<HTMLDivElement>}
+				></div>
 			</Layout>
 		</>
 	)
 }
+// .products.data.map(({ attributes, id }: any) => {
+// 	// console.log(attributes)
 
+// 	return (
+// 		<ProductCard
+// 			key={attributes.name}
+// 			productDetails={{ id, ...attributes }}
+// 		/>
+// 	)
+// })}
 export const getServerSideProps: GetServerSideProps = async (context) => {
 	const gqlClient = authenticatedGraphQl(context.req.cookies)
 
@@ -52,15 +156,24 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		return data_1
 	})
 
-	const [products, _] = await Promise.all([
-		gqlClient.request(PRODUCTS),
-		user_stats,
-	])
+	const products = queryClient.prefetchInfiniteQuery(
+		['products', []],
+		async ({ pageParam = 0 }) => {
+			return await request(
+				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
+				PRODUCTS,
+				{
+					pagination: { start: pageParam, limit: LIMIT },
+				}
+			)
+		}
+	)
+
+	await Promise.all([products, user_stats])
 
 	return {
 		props: {
-			dehydratedState: dehydrate(queryClient),
-			products,
+			dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
 		},
 	}
 }

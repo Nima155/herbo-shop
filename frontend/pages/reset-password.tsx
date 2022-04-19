@@ -58,60 +58,63 @@ export default function ResetPassword({ code }: { code: string }) {
 		mutation.mutate(data)
 	}
 	return (
-		<Layout twStyles="max-w-lg rounded-lg shadow-lg absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 bg-white p-5">
-			{mutation.isLoading ? (
-				<LoadingDots />
-			) : mutation.isSuccess ? (
-				<div className="flex flex-col gap-2 justify-center items-center max-w-xs text-center">
-					<Image
-						src="/green-tick.svg"
-						height={50}
-						width={50}
-						alt="A tick indicating success"
-					/>
-					<p>
-						Password change was successful. You will soon be redirected to the
-						main page
-					</p>
-				</div>
-			) : (
-				<form
-					onSubmit={handleSubmit(onSubmitForm)}
-					className="flex flex-col gap-2"
-				>
-					<InputLabelWrapper>
-						<Label htmlFor="newPassword">new password</Label>
-						<Input
-							type="password"
-							id="newPassword"
-							{...register('newPassword', {
-								required: true,
-							})}
-							autoFocus
+		<Layout>
+			<div className="shadow-lg p-5 rounded-lg absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
+				{mutation.isLoading ? (
+					<LoadingDots />
+				) : mutation.isSuccess ? (
+					<div className="flex flex-col gap-2 justify-center items-center max-w-xs text-center">
+						<Image
+							src="/green-tick.svg"
+							height={50}
+							width={50}
+							alt="A tick indicating success"
 						/>
-					</InputLabelWrapper>
-					<InputLabelWrapper>
-						<Label htmlFor="confirmNewPassword">confirm password</Label>
-						<Input
-							type="password"
-							id="confirmNewPassword"
-							{...register('confirmNewPassword', {
-								required: true,
-								validate: (v) => v === newPassword || 'Passwords do not match',
-								onChange: () => {
-									clearErrors('confirmNewPassword')
-								},
-							})}
-						/>
-						{errors.confirmNewPassword && (
-							<span className="text-red-800 text-xs">
-								{errors.confirmNewPassword.message}
-							</span>
-						)}
-					</InputLabelWrapper>
-					<SubmitButton>Update</SubmitButton>
-				</form>
-			)}
+						<p>
+							Password change was successful. You will soon be redirected to the
+							main page
+						</p>
+					</div>
+				) : (
+					<form
+						onSubmit={handleSubmit(onSubmitForm)}
+						className="flex flex-col gap-2"
+					>
+						<InputLabelWrapper>
+							<Label htmlFor="newPassword">new password</Label>
+							<Input
+								type="password"
+								id="newPassword"
+								{...register('newPassword', {
+									required: true,
+								})}
+								autoFocus
+							/>
+						</InputLabelWrapper>
+						<InputLabelWrapper>
+							<Label htmlFor="confirmNewPassword">confirm password</Label>
+							<Input
+								type="password"
+								id="confirmNewPassword"
+								{...register('confirmNewPassword', {
+									required: true,
+									validate: (v) =>
+										v === newPassword || 'Passwords do not match',
+									onChange: () => {
+										clearErrors('confirmNewPassword')
+									},
+								})}
+							/>
+							{errors.confirmNewPassword && (
+								<span className="text-red-800 text-xs">
+									{errors.confirmNewPassword.message}
+								</span>
+							)}
+						</InputLabelWrapper>
+						<SubmitButton>Update</SubmitButton>
+					</form>
+				)}
+			</div>
 		</Layout>
 	)
 }

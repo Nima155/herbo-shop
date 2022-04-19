@@ -1,5 +1,5 @@
 import { GetServerSideProps } from 'next'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { AnimatePresence, LayoutGroup, Reorder, motion } from 'framer-motion'
 import { dehydrate, QueryClient } from 'react-query'
 import { useShoppingCart } from 'use-shopping-cart'

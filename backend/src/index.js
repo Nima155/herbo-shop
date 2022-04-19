@@ -32,11 +32,42 @@ module.exports = {
       .service("format").returnTypes;
     extensionService.use(({ nexus }) => ({
       resolversConfig: {
+        "Query.orders": {
+          middlewares: [
+            async (next, parent, { filters, ...rest }, ctx, info) => {
+              const transformedArgs = {
+                ...rest,
+                filters: { ...filters, user: { id: ctx.state.user.id } },
+              };
+              console.log(transformedArgs);
+              return await next(parent, transformedArgs, ctx, info);
+            },
+          ],
+        },
         "Mutation.login": {
           middlewares: MIDDLEWARES, // CSRF check
         },
         "Mutation.createAddress": {
           middlewares: MIDDLEWARES, // CSRF check
+        },
+        "Mutation.createOrder": {
+          middlewares: [
+            async (next, parent, args, ctx, info) => {
+              const { value } = await next(parent, args, ctx, info);
+              if (value) {
+                await strapi.entityService.update(
+                  "api::order.order",
+                  value.id,
+                  {
+                    data: {
+                      user: args.data.user,
+                    },
+                  }
+                );
+              }
+            },
+          ],
+          // auth: false,
         },
         "Mutation.deleteAddress": {
           middlewares: [

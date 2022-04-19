@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { RefObject, useEffect, useState } from 'react'
 import { ProductAttributes } from '../lib/types'
 import Image from 'next/image'
 import Button from './Button'
@@ -8,8 +8,10 @@ import Toast, { useToastStore } from './ToastNotifications'
 
 export default function ProductCard({
 	productDetails,
+	ref,
 }: {
 	productDetails: ProductAttributes
+	ref?: any
 }) {
 	const [isPressed, setIsPressed] = useState(false)
 	const { addItem } = useShoppingCart()
@@ -22,7 +24,7 @@ export default function ProductCard({
 	// console.log('render')
 
 	return (
-		<li className="flex flex-col p-5 rounded-lg shadow-md gap-1">
+		<li className="flex flex-col p-5 rounded-lg shadow-md gap-1" ref={ref}>
 			<div className="flex justify-between items-center gap-2">
 				<p className="text-slate-700 font-semibold flex-grow-0">
 					{productDetails.name}

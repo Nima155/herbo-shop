@@ -1,8 +1,8 @@
 import { gql } from 'graphql-request'
 
 export default gql`
-	query Products($ids: [ID]) {
-		products(filters: { id: { in: $ids } }) {
+	query Products($ids: [ID], $pagination: PaginationArg) {
+		products(filters: { id: { in: $ids } }, pagination: $pagination) {
 			data {
 				id
 				attributes {
@@ -24,6 +24,14 @@ export default gql`
 							}
 						}
 					}
+				}
+			}
+			meta {
+				pagination {
+					total
+					page
+					pageSize
+					pageCount
 				}
 			}
 		}
