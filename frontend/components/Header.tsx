@@ -12,7 +12,7 @@ import Register from './Register'
 import Image from 'next/image'
 import { useShoppingCart } from 'use-shopping-cart'
 import Link from 'next/link'
-
+import { useRouter } from 'next/router'
 function CartButton() {
 	const { cartCount } = useShoppingCart()
 
@@ -38,7 +38,7 @@ const StyledAnchor = styled.a.attrs({
 export default function Header() {
 	const { user } = useUser()
 	const queryClient = useQueryClient()
-
+	const router = useRouter()
 	const logoutMutation = useMutation(
 		async (event: React.MouseEvent<HTMLButtonElement>) => {
 			await authenticatedGraphQl().request(queries.LOGOUT)
@@ -46,6 +46,8 @@ export default function Header() {
 		{
 			onSuccess: () => {
 				queryClient.removeQueries('user_stats', { exact: true })
+				queryClient.removeQueries('user_addresses', { exact: true })
+				router.push('/')
 			},
 		}
 	)

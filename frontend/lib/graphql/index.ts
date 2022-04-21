@@ -15,7 +15,9 @@ import CREATE_ORDER from './mutations/createOrder'
 import CREATE_ORDER_LISTS from './mutations/createOrderLists'
 import ORDERS from './queries/orders'
 import CATEGORIES from './queries/categories'
+import UPDATE_USER from './mutations/updateUser'
 const exports = {
+	UPDATE_USER,
 	CATEGORIES,
 	ORDERS,
 	CREATE_ORDER_LISTS,

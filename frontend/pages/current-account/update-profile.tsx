@@ -13,6 +13,7 @@ import isEmail from 'validator/lib/isEmail'
 import SubmitButton from '../../components/Input/SubmitButton'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import { PASSWORD_STRENGTH_OPTIONS } from '../../lib/constants'
+import { useToastStore } from '../../components/ToastNotifications'
 
 export default function UpdateProfile() {
 	const {
@@ -23,7 +24,7 @@ export default function UpdateProfile() {
 		formState: { errors: errorsPass },
 		watch: watchPass,
 	} = useForm({ reValidateMode: 'onSubmit' })
-
+	const { UPDATE_USER } = queries
 	const {
 		register,
 		handleSubmit,
@@ -37,11 +38,39 @@ export default function UpdateProfile() {
 	const confirmPassword = watchPass('confirmPassword')
 
 	const { data } = useQuery('user_stats')
+	const { add: addToast } = useToastStore()
+	const mutate = useMutation(
+		async (data2) => {
+			return authenticatedGraphQl().request(UPDATE_USER, {
+				id: data.me.id,
+				data: data2,
+			})
+		},
+		{
+			onSuccess: (successData) => {
+				console.log(successData)
 
-	const mutate = useMutation(async () => {})
+				addToast({
+					id: `${successData} ${Date.now()}`,
+					message: `email successfully modified`,
+					typ: 'success',
+				})
+			},
+			onError: (error) => {
+				setError('email', {
+					type: 'custom',
+					message: error.response.errors[0].message,
+				})
+			},
+		}
+	)
 
-	const onEmailSubmit = async () => {}
-	const onPasswordSubmit = async () => {}
+	const onEmailSubmit = async (d) => {
+		mutate.mutate(d)
+	}
+	const onPasswordSubmit = async (d) => {
+		mutate.mutate(d)
+	}
 
 	return (
 		<Layout>
@@ -68,7 +97,7 @@ export default function UpdateProfile() {
 					</h2>
 				</div>
 
-				<form onSubmit={handleSubmit(onEmailSubmit)} className="">
+				<form onSubmit={handleSubmit(onEmailSubmit)}>
 					<InputLabelWrapper>
 						<Label htmlFor="email">
 							email<span className="text-red-400">*</span>{' '}
@@ -99,7 +128,7 @@ export default function UpdateProfile() {
 					onSubmit={handleSubmitPass(onPasswordSubmit)}
 					className="flex justify-evenly flex-col gap-4 mt-8 "
 				>
-					<InputLabelWrapper>
+					{/* <InputLabelWrapper>
 						<Label htmlFor="current-password">
 							current password<span className="text-red-400">*</span>
 						</Label>
@@ -118,13 +147,14 @@ export default function UpdateProfile() {
 								{errorsPass.currentPassword.message}
 							</span>
 						)}
-					</InputLabelWrapper>
+					</InputLabelWrapper> */}
 					<InputLabelWrapper>
 						<Label htmlFor="new-password">
 							new password<span className="text-red-400">*</span>
 						</Label>
 						<Input
 							type="password"
+							autoComplete="new-password"
 							id="new-password"
 							{...registerPass('newPassword', {
 								validate: (v) => isStrongPassword(v, PASSWORD_STRENGTH_OPTIONS),

@@ -3,6 +3,7 @@
 const Stripe = require("stripe");
 const CSRF = require("koa-csrf");
 const csrfProtection = new CSRF();
+const _ = require("lodash");
 
 const stripe = new Stripe(process.env.STRIPE_TEST_API_KEY, {
   apiVersion: "2020-08-27",
@@ -32,6 +33,34 @@ module.exports = {
       .service("format").returnTypes;
     extensionService.use(({ nexus }) => ({
       resolversConfig: {
+        "Mutation.updateUsersPermissionsUser": {
+          policies: ["global::isOwner"],
+          middlewares: [
+            // ...MIDDLEWARES,
+            async (next, parent, args, ctx, info) => {
+              const newData = _.pick(args.data, ["password", "email"]);
+              if (newData.email) {
+                const userWithSameEmail = await strapi
+                  .query("plugin::users-permissions.user")
+                  .findOne({ where: { email: newData.email.toLowerCase() } });
+
+                if (
+                  userWithSameEmail &&
+                  userWithSameEmail.id !== ctx.state.user.id
+                ) {
+                  throw new Error("Email already taken!");
+                }
+              }
+
+              return await next(
+                parent,
+                { id: args.id, data: newData },
+                ctx,
+                info
+              );
+            },
+          ], // CSRF check
+        },
         "Query.orders": {
           middlewares: [
             async (next, parent, { filters, ...rest }, ctx, info) => {

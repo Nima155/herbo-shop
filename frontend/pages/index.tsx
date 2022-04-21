@@ -1,8 +1,8 @@
 import type { GetServerSideProps } from 'next'
 import Head from 'next/head'
-import { dehydrate, QueryClient, useInfiniteQuery } from 'react-query'
+import { dehydrate, QueryClient, useInfiniteQuery, useQuery } from 'react-query'
 import Layout from '../components/Layout'
-
+import Select from 'react-select'
 import queries from '../lib/graphql'
 import { authenticatedGraphQl } from '../lib/helpers'
 import ProductCard from '../components/ProductCard'
@@ -10,42 +10,34 @@ import ProductCard from '../components/ProductCard'
 import useInView from '../lib/useInView'
 import { RefObject, useEffect, useState } from 'react'
 import { request } from 'graphql-request'
-import { LayoutGroup, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
-function FilterAccordion() {
-	const [show, setShow] = useState(false)
+function FilterAccordion({ setCat }: { setCat: (ids: [string]) => void }) {
+	const { CATEGORIES } = queries
+	const { data } = useQuery(
+		'categories',
+		async () => {
+			const data_1 = request(
+				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
+				CATEGORIES
+			)
+			return data_1
+		},
+		{ staleTime: 60 * 5 * 1000 }
+	)
+
 	return (
-		<motion.div
-			className="flex justify-center flex-col items-center"
-			layout="position"
-		>
-			<button onClick={() => setShow((e) => !e)}>
-				<motion.svg
-					id="i-filter"
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 32 32"
-					width="32"
-					height="32"
-					fill="none"
-					stroke="currentcolor"
-					strokeLinecap="round"
-					strokeLinejoin="round"
-					strokeWidth="2"
-					whileHover={{ scale: 1.2 }}
-				>
-					<path d="M2 5 C2 5 6 3 16 3 26 3 30 5 30 5 L19 18 19 27 13 30 13 18 2 5Z" />
-				</motion.svg>
-			</button>
-			{show && (
-				<motion.div
-					layout
-					initial={{ height: 0, opacity: 0 }}
-					animate={{ height: 'auto', opacity: 1 }}
-				>
-					hi
-				</motion.div>
-			)}
-		</motion.div>
+		<div className="flex flex-col gap-1 sm:flex-row sm:px-4">
+			<Select
+				getOptionLabel={(option) => option.attributes.name}
+				getOptionValue={(option) => option.id}
+				options={data.categories.data}
+				isMulti
+				placeholder="Select Categories"
+				instanceId="tags"
+				onChange={(values) => setCat(values.map((tag) => tag.id) as [string])}
+			/>
+		</div>
 	)
 }
 
@@ -54,18 +46,21 @@ const Home = () => {
 	// console.log(products.products.data)
 
 	const [ref, inView] = useInView()
-	const [categories, setCategories] = useState([])
+	const [categories, setCategories] = useState<[string]>([])
 	const { PRODUCTS } = queries
 	// console.log(products.products)
 
 	const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery(
-		'products',
+		['products', categories],
 		async ({ pageParam = 0 }) => {
 			return await request(
 				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
 				PRODUCTS,
 				{
 					pagination: { start: pageParam, limit: LIMIT },
+					...(categories.length && {
+						filters: { and: { categories: { id: { in: categories } } } },
+					}),
 				}
 			)
 		},
@@ -96,29 +91,25 @@ const Home = () => {
 			</Head>
 
 			<Layout>
-				<LayoutGroup>
-					<FilterAccordion />
-					<motion.ul
-						className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
-						layout="position"
-					>
-						{data?.pages
-							.map((e) => e.products.data)
-							.flat()
-							.map(({ attributes, id }: any) => {
-								return (
-									<ProductCard
-										key={attributes.name}
-										productDetails={{ id, ...attributes }}
-									/>
-								)
-							})}
-					</motion.ul>
-				</LayoutGroup>
+				<FilterAccordion setCat={setCategories} />
+				<ul className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4">
+					{data?.pages
+						.map((e) => e.products.data)
+						.flat()
+						.map(({ attributes, id }: any) => {
+							return (
+								<ProductCard
+									key={attributes.name}
+									productDetails={{ id, ...attributes }}
+								/>
+							)
+						})}
+				</ul>
+
 				{/* loading logic */}
 				{!isLoading && !hasNextPage && (
 					<motion.div
-						className="flex justify-center bg-slate-200 p-5 m-5 text-slate-600/75 shadow-md rounded-md"
+						className="flex justify-center max-w-lg mx-auto bg-slate-200/60 p-5 m-5 text-slate-600/75 shadow-md rounded-md text-center"
 						initial={{ opacity: 0, scale: 0 }}
 						whileInView={{ opacity: 1, scale: 1 }}
 						viewport={{ once: true }}
@@ -126,6 +117,7 @@ const Home = () => {
 						You've reached the end!
 					</motion.div>
 				)}
+
 				<div
 					className="h-1 bg-transparent"
 					ref={ref as RefObject<HTMLDivElement>}
@@ -148,11 +140,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	const gqlClient = authenticatedGraphQl(context.req.cookies)
 
 	const queryClient = new QueryClient()
-	const { USER_INFO, PRODUCTS } = queries
+	const { USER_INFO, PRODUCTS, CATEGORIES } = queries
 
 	// console.log(products.products.data[0].attributes.picture.data[0].attributes)
 	const user_stats = queryClient.prefetchQuery('user_stats', async () => {
 		const data_1 = gqlClient.request(USER_INFO)
+		return data_1
+	})
+
+	const cats = queryClient.prefetchQuery('categories', async () => {
+		const data_1 = gqlClient.request(CATEGORIES)
+
 		return data_1
 	})
 
@@ -169,7 +167,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		}
 	)
 
-	await Promise.all([products, user_stats])
+	await Promise.all([products, user_stats, cats])
 
 	return {
 		props: {

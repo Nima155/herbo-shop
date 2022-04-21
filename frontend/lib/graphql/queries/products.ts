@@ -1,8 +1,8 @@
 import { gql } from 'graphql-request'
 
 export default gql`
-	query Products($ids: [ID], $pagination: PaginationArg) {
-		products(filters: { id: { in: $ids } }, pagination: $pagination) {
+	query Products($filters: ProductFiltersInput, $pagination: PaginationArg) {
+		products(filters: $filters, pagination: $pagination) {
 			data {
 				id
 				attributes {
