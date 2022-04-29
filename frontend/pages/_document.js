@@ -17,6 +17,7 @@ class MyDocument extends Document {
 					<NextScript />
 
 					<div className="z-30" id="toastContainer" />
+					{/* <div className="z-30" id="hamburger" /> */}
 				</body>
 			</Html>
 		)

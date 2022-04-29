@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Logo from '../public/Logo.svg'
 import Hamburger from './Hamburger'
 import Login from './Login'
@@ -12,6 +12,7 @@ import Register from './Register'
 import Image from 'next/image'
 import { useShoppingCart } from 'use-shopping-cart'
 import Link from 'next/link'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 function CartButton() {
 	const { cartCount } = useShoppingCart()
@@ -21,7 +22,7 @@ function CartButton() {
 			{/* <Toast /> */}
 
 			<Link href={'/cart'} passHref>
-				<div className="relative cursor-pointer">
+				<div className="relative cursor-pointer self-end">
 					<p className="absolute z-10 bg-emerald-700 bg-opacity-80 rounded-full h-5 w-5 text-slate-100 flex items-center text-xs justify-center -top-2 -right-2">
 						{cartCount}
 					</p>
@@ -32,9 +33,13 @@ function CartButton() {
 	)
 }
 
-const StyledAnchor = styled.a.attrs({
-	className: 'hover:text-emerald-700',
-})``
+const StyledAnchor = styled.a.attrs<{ className: string }>((props) => ({
+	className: `hover:text-emerald-700 ${props.className}`,
+}))``
+
+let didScroll = false
+let lastY = 0
+
 export default function Header() {
 	const { user } = useUser()
 	const queryClient = useQueryClient()
@@ -51,13 +56,45 @@ export default function Header() {
 			},
 		}
 	)
+	const [hide, setHide] = useState(false)
+
+	useEffect(() => {
+		function handleScroll(event: Event) {
+			didScroll = true
+		}
+
+		window.addEventListener('scroll', handleScroll, false)
+
+		const interval = setInterval(() => {
+			if (didScroll) {
+				console.log('hi')
+
+				if (lastY < window.scrollY) {
+					setHide(true)
+				} else {
+					setHide(false)
+				}
+				lastY = window.scrollY
+
+				didScroll = false
+			}
+		}, 250)
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll, false)
+			clearInterval(interval)
+		}
+	}, [])
 
 	return (
-		<header className="p-5 max-w-screen-xl mx-auto">
+		<motion.header
+			className={`px-5 py-2 max-w-screen-xl -translate-x-1/2 left-1/2 fixed top-0 z-30 w-full bg-slate-100`}
+			animate={{ top: hide ? -300 : 0 }}
+		>
 			{/* <Modal modalActivator={() => {}}> */}
-			<nav className="flex justify-between p-2 items-center">
+			<nav className="flex py-1 items-end justify-end sm:justify-between">
 				<Link href="/" passHref scroll={false}>
-					<a className="transition-opacity hover:opacity-70 cursor-pointer sm:block hidden">
+					<a className="transition-opacity hover:opacity-70 cursor-pointer">
 						<Logo width={82} height={40} />
 					</a>
 				</Link>
@@ -74,12 +111,36 @@ export default function Header() {
 						</li>
 					</ul>
 				) : (
-					<div className="relative hidden sm:flex sm:gap-5">
+					<div className="relative flex gap-5 top-2 flex-row justify-end">
 						<CartButton />
+						<Link
+							href="/current-account/update-profile"
+							passHref
+							scroll={false}
+						>
+							<StyledAnchor className="sm:hidden">
+								<Image
+									src={'/profile.svg'}
+									height={25}
+									width={25}
+									alt={'chevron point to the left'}
+								/>
+							</StyledAnchor>
+						</Link>
+
 						<Popover>
-							<Popover.Button className="hover:text-emerald-700 transition-colors ease-linear">
-								{user.me.username}
+							<Popover.Button className="hover:text-emerald-700 transition-colors ease-linear sm:flex flex-col hidden">
+								<Image
+									src={'/profile.svg'}
+									height={25}
+									width={25}
+									alt={'chevron point to the left'}
+								/>
+								<span className="hidden sm:inline w-24 overflow-hidden text-ellipsis whitespace-nowrap">
+									{user.me.username}
+								</span>
 							</Popover.Button>
+
 							<Transition
 								enter="transition duration-100 ease-out"
 								enterFrom="transform scale-95 opacity-0"
@@ -88,7 +149,7 @@ export default function Header() {
 								leaveFrom="transform scale-100 opacity-100"
 								leaveTo="transform scale-95 opacity-0"
 							>
-								<Popover.Panel className="absolute z-10 p-2 overflow-hidden rounded-md border shadow-md shadow-emerald-200 bg-slate-100">
+								<Popover.Panel className="absolute z-10 -left-6 sm:left-3 p-2 overflow-hidden rounded-md border shadow-md shadow-emerald-200 bg-slate-100">
 									<div className="flex flex-col gap-2 text-sm capitalize">
 										<Link
 											href="/current-account/update-profile"
@@ -127,6 +188,6 @@ export default function Header() {
 			</nav>
 
 			{/* </div> */}
-		</header>
+		</motion.header>
 	)
 }

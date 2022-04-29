@@ -26,10 +26,10 @@ export default function Modal({
 			open={modalIsOpen}
 			onClose={modalSetter}
 			as="div"
-			className="fixed z-10 inset-0 overflow-y-auto flex justify-center items-center"
+			className="fixed z-40 inset-0 overflow-y-auto flex justify-center items-center"
 		>
-			<Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
-			<div className="mx-2">
+			<Dialog.Backdrop className="fixed inset-0 bg-black opacity-30 z-30" />
+			<Dialog.Panel className="mx-2">
 				<motion.div
 					initial="hidden"
 					animate="visible"
@@ -39,7 +39,7 @@ export default function Modal({
 				>
 					{children}
 				</motion.div>
-			</div>
+			</Dialog.Panel>
 		</Dialog>
 	)
 }

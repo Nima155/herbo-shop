@@ -10,7 +10,7 @@ import ProductCard from '../components/ProductCard'
 import useInView from '../lib/useInView'
 import { RefObject, useEffect, useState } from 'react'
 import { request } from 'graphql-request'
-import { motion } from 'framer-motion'
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 
 function FilterAccordion({ setCat }: { setCat: (ids: [string]) => void }) {
 	const { CATEGORIES } = queries
@@ -29,6 +29,7 @@ function FilterAccordion({ setCat }: { setCat: (ids: [string]) => void }) {
 	return (
 		<div className="flex flex-col gap-1 sm:flex-row sm:px-4">
 			<Select
+				className="sm:w-80"
 				getOptionLabel={(option) => option.attributes.name}
 				getOptionValue={(option) => option.id}
 				options={data.categories.data}
@@ -74,6 +75,7 @@ const Home = () => {
 			},
 		}
 	)
+	// console.log(inView)
 
 	useEffect(() => {
 		if (inView && hasNextPage) {
@@ -92,19 +94,26 @@ const Home = () => {
 
 			<Layout>
 				<FilterAccordion setCat={setCategories} />
-				<ul className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4">
-					{data?.pages
-						.map((e) => e.products.data)
-						.flat()
-						.map(({ attributes, id }: any) => {
-							return (
-								<ProductCard
-									key={attributes.name}
-									productDetails={{ id, ...attributes }}
-								/>
-							)
-						})}
-				</ul>
+				{/* <LayoutGroup> */}
+				<motion.ul
+					className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
+					layoutScroll
+					// layout="position"
+				>
+					<AnimatePresence>
+						{data?.pages
+							.map((e) => e.products.data)
+							.flat()
+							.map(({ attributes, id }: any) => {
+								return (
+									<ProductCard
+										key={id}
+										productDetails={{ id, ...attributes }}
+									/>
+								)
+							})}
+					</AnimatePresence>
+				</motion.ul>
 
 				{/* loading logic */}
 				{!isLoading && !hasNextPage && (
@@ -112,11 +121,13 @@ const Home = () => {
 						className="flex justify-center max-w-lg mx-auto bg-slate-200/60 p-5 m-5 text-slate-600/75 shadow-md rounded-md text-center"
 						initial={{ opacity: 0, scale: 0 }}
 						whileInView={{ opacity: 1, scale: 1 }}
-						viewport={{ once: true }}
+						// viewport={{ once: true }}
+						layout="position"
 					>
 						You've reached the end!
 					</motion.div>
 				)}
+				{/* </LayoutGroup> */}
 
 				<div
 					className="h-1 bg-transparent"
@@ -126,16 +137,7 @@ const Home = () => {
 		</>
 	)
 }
-// .products.data.map(({ attributes, id }: any) => {
-// 	// console.log(attributes)
 
-// 	return (
-// 		<ProductCard
-// 			key={attributes.name}
-// 			productDetails={{ id, ...attributes }}
-// 		/>
-// 	)
-// })}
 export const getServerSideProps: GetServerSideProps = async (context) => {
 	const gqlClient = authenticatedGraphQl(context.req.cookies)
 

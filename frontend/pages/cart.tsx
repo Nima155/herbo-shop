@@ -75,6 +75,11 @@ export default function Cart() {
 					</div>
 				</div>
 			</div>
+			{!cartCount && (
+				<h1 className="text-center w-full block text-xl">
+					You have no items in your cart
+				</h1>
+			)}
 		</Layout>
 	)
 }

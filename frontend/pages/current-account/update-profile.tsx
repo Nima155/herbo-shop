@@ -23,23 +23,25 @@ export default function UpdateProfile() {
 		clearErrors: clearErrorsPass,
 		formState: { errors: errorsPass },
 		watch: watchPass,
+		reset: passReset,
 	} = useForm({ reValidateMode: 'onSubmit' })
-	const { UPDATE_USER } = queries
 	const {
 		register,
 		handleSubmit,
 		setError,
 		clearErrors,
 		formState: { errors },
-		watch,
 	} = useForm({ reValidateMode: 'onSubmit' })
+
+	const { UPDATE_USER } = queries
 
 	const newPassword = watchPass('newPassword')
 	const confirmPassword = watchPass('confirmPassword')
 
 	const { data } = useQuery('user_stats')
 	const { add: addToast } = useToastStore()
-	const mutate = useMutation(
+
+	const mutateUser = useMutation(
 		async (data2) => {
 			return authenticatedGraphQl().request(UPDATE_USER, {
 				id: data.me.id,
@@ -47,29 +49,37 @@ export default function UpdateProfile() {
 			})
 		},
 		{
-			onSuccess: (successData) => {
-				console.log(successData)
-
+			onSuccess: (successData, variables) => {
 				addToast({
 					id: `${successData} ${Date.now()}`,
-					message: `email successfully modified`,
+					message: `${
+						variables.email ? 'email' : 'password'
+					} successfully modified`,
 					typ: 'success',
 				})
+				if (variables.password) {
+					passReset()
+				}
 			},
-			onError: (error) => {
-				setError('email', {
-					type: 'custom',
-					message: error.response.errors[0].message,
-				})
+			onError: (error, variables) => {
+				if (variables.email) {
+					setError('email', {
+						type: 'custom',
+						message: error.response.errors[0].message,
+					})
+				} else {
+					setErrorPass('newPassword', {
+						type: 'custom',
+						message: error.response.errors[0].message,
+					})
+				}
 			},
 		}
 	)
 
-	const onEmailSubmit = async (d) => {
-		mutate.mutate(d)
-	}
-	const onPasswordSubmit = async (d) => {
-		mutate.mutate(d)
+	const onUserDataSubmit = (d) => {
+		const refined = { email: d.email, password: d.newPassword }
+		mutateUser.mutate(refined)
 	}
 
 	return (
@@ -97,7 +107,7 @@ export default function UpdateProfile() {
 					</h2>
 				</div>
 
-				<form onSubmit={handleSubmit(onEmailSubmit)}>
+				<form onSubmit={handleSubmit(onUserDataSubmit)}>
 					<InputLabelWrapper>
 						<Label htmlFor="email">
 							email<span className="text-red-400">*</span>{' '}
@@ -125,7 +135,7 @@ export default function UpdateProfile() {
 				</form>
 
 				<form
-					onSubmit={handleSubmitPass(onPasswordSubmit)}
+					onSubmit={handleSubmitPass(onUserDataSubmit)}
 					className="flex justify-evenly flex-col gap-4 mt-8 "
 				>
 					{/* <InputLabelWrapper>

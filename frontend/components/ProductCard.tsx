@@ -5,7 +5,7 @@ import Button from './Button'
 import { useShoppingCart, formatCurrencyString } from 'use-shopping-cart'
 import Carousel from './Carousel'
 import Toast, { useToastStore } from './ToastNotifications'
-
+import { motion } from 'framer-motion'
 export default function ProductCard({
 	productDetails,
 	ref,
@@ -24,7 +24,15 @@ export default function ProductCard({
 	// console.log('render')
 
 	return (
-		<li className="flex flex-col p-5 rounded-lg shadow-md gap-1" ref={ref}>
+		<motion.li
+			className="flex flex-col p-5 rounded-lg shadow-md gap-1 over"
+			ref={ref}
+			layout="position"
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			layoutScroll
+		>
 			<div className="flex justify-between items-center gap-2">
 				<p className="text-slate-700 font-semibold flex-grow-0">
 					{productDetails.name}
@@ -89,6 +97,6 @@ export default function ProductCard({
 			>
 				Add to Cart{' '}
 			</Button>
-		</li>
+		</motion.li>
 	)
 }

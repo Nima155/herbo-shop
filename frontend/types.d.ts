@@ -4,3 +4,4 @@ declare module 'iron-session' {
 		token?: string
 	}
 }
+declare module 'flubber'

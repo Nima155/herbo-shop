@@ -14,7 +14,7 @@ export default function Layout({
 	twStyles?: string
 }) {
 	return (
-		<div className={`p-5 max-w-screen-xl mx-auto`}>
+		<div className={`p-5 max-w-screen-xl mx-auto mt-20`}>
 			<motion.main
 				className={twStyles}
 				variants={variants} // Pass the variant object into Framer Motion
