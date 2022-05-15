@@ -1,21 +1,23 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { Fragment, useState } from 'react'
+import ReactDOM from 'react-dom'
 import create from 'zustand'
 
 import PopInMenu from './PopInMenu'
 
-const useToggle = create<{ toggled: boolean; toggle: (_?: boolean) => void }>(
-	(set) => ({
-		toggled: false,
+export const useToggle = create<{
+	toggled: boolean
+	toggle: (_?: boolean) => void
+}>((set) => ({
+	toggled: false,
 
-		toggle: (targetState) => {
-			set((state) => ({
-				toggled: targetState !== undefined ? targetState : !state.toggled,
-			}))
-		},
-	})
-)
+	toggle: (targetState) => {
+		set((state) => ({
+			toggled: targetState !== undefined ? targetState : !state.toggled,
+		}))
+	},
+}))
 
 const MENU_TRANSITION = {
 	initial: {
@@ -40,7 +42,8 @@ function HamburgerMenu() {
 					}}
 					static
 					as={motion.div}
-					className="fixed top-0 overflow-y-auto w-1/2 max-w-xs bg-green-100 h-screen border-0 pt-16 pl-5 flex flex-col gap-3 sm:hidden z-20 overflow-x-hidden"
+					className="fixed top-0 overflow-y-auto w-1/2 max-w-xs bg-slate-100 h-screen border-0
+							   flex flex-col gap-3 sm:hidden z-30 overflow-x-hidden"
 					style={{ minWidth: '16rem' }}
 					variants={MENU_TRANSITION}
 					initial="initial"
@@ -52,15 +55,16 @@ function HamburgerMenu() {
 						when: 'beforeChildren',
 					}}
 				>
+					<MenuToggle />
 					<Dialog.Backdrop
-						className="fixed inset-0 bg-black opacity-30"
+						className="fixed inset-0 bg-black opacity-30 z-30"
 						as={motion.div}
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 0.3 }}
 						exit={{ opacity: 0 }}
 					/>
 
-					<PopInMenu active={toggled} />
+					<PopInMenu />
 				</Dialog>
 			)}
 		</AnimatePresence>
@@ -85,7 +89,7 @@ const MenuToggle = () => {
 			onClick={(e) => {
 				toggle()
 			}}
-			className="top-2 left-2 z-50 sm:hidden fixed"
+			className="top-6 left-6 sm:hidden fixed z-50"
 		>
 			<svg width="23" height="23" viewBox="0 0 23 23">
 				<Path

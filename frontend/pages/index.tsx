@@ -6,11 +6,34 @@ import Select from 'react-select'
 import queries from '../lib/graphql'
 import { authenticatedGraphQl } from '../lib/helpers'
 import ProductCard from '../components/ProductCard'
-
 import useInView from '../lib/useInView'
 import { RefObject, useEffect, useState } from 'react'
 import { request } from 'graphql-request'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import {
+	InstantSearch,
+	SearchBox,
+	Hits,
+	Highlight,
+} from 'react-instantsearch-dom'
+import { instantMeiliSearch } from '@meilisearch/instant-meilisearch'
+
+const searchClient = instantMeiliSearch('http://127.0.0.1:7700')
+
+function SearchBar() {
+	return (
+		<InstantSearch indexName="product" searchClient={searchClient}>
+			<SearchBox />
+			<Hits hitComponent={Hit} />
+		</InstantSearch>
+	)
+}
+
+const Hit = ({ hit }) => {
+	console.log(hit)
+
+	return <Highlight attribute="name" hit={hit} />
+}
 
 function FilterAccordion({ setCat }: { setCat: (ids: [string]) => void }) {
 	const { CATEGORIES } = queries
@@ -95,6 +118,7 @@ const Home = () => {
 			<Layout>
 				<FilterAccordion setCat={setCategories} />
 				{/* <LayoutGroup> */}
+				<SearchBar />
 				<motion.ul
 					className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
 					layoutScroll
