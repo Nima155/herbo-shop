@@ -42,15 +42,15 @@ export default function ProductCard({
 				</p>
 			</div>
 			<Carousel>
-				{productDetails.picture.data.map((e, i) => {
+				{productDetails.picture.map((e, i) => {
 					// console.log(e.attributes.formats.small.url)
 					return (
 						<Image
 							key={i}
 							// loader={imageLoader}
-							src={`${process.env.NEXT_PUBLIC_IMAGE_PREFIX}${e.attributes.formats.small.url}`}
-							width={e.attributes.formats.small.width - 200}
-							height={e.attributes.formats.small.height - 200}
+							src={`${process.env.NEXT_PUBLIC_IMAGE_PREFIX}${e.formats.small.url}`}
+							width={e.formats.small.width - 200}
+							height={e.formats.small.height - 200}
 							alt={productDetails.description}
 						/>
 					)
@@ -76,7 +76,7 @@ export default function ProductCard({
 					addItem({
 						currency: 'USD',
 						name: productDetails.name,
-						image: `${process.env.NEXT_PUBLIC_IMAGE_PREFIX}${productDetails.picture.data[0].attributes.formats.small.url}`,
+						image: `${process.env.NEXT_PUBLIC_IMAGE_PREFIX}${productDetails.picture[0].formats.small.url}`,
 						description: productDetails.description,
 						id: productDetails.id,
 						price: productDetails.price,

@@ -7,32 +7,81 @@ import queries from '../lib/graphql'
 import { authenticatedGraphQl } from '../lib/helpers'
 import ProductCard from '../components/ProductCard'
 import useInView from '../lib/useInView'
-import { RefObject, useEffect, useState } from 'react'
 import { request } from 'graphql-request'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import Image from 'next/image'
 import {
+	useHits,
 	InstantSearch,
 	SearchBox,
-	Hits,
-	Highlight,
-} from 'react-instantsearch-dom'
+	UseHitsProps,
+} from 'react-instantsearch-hooks-web'
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch'
+import { useMemo, useRef } from 'react'
 
 const searchClient = instantMeiliSearch('http://127.0.0.1:7700')
 
-function SearchBar() {
+const CustomHits = (props: UseHitsProps) => {
+	const { hits } = useHits(props)
+	return (
+		<motion.ul
+			className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
+			layoutScroll
+			// layout="position"
+		>
+			<AnimatePresence>
+				{hits.map((hit) => (
+					<Hit hit={hit} key={hit.id as string} />
+				))}
+			</AnimatePresence>
+		</motion.ul>
+	)
+}
+
+function Search() {
+	const searchRef = useRef<null | ((_: string) => void)>(null)
+	// console.log('bye', searchRef)
+
 	return (
 		<InstantSearch indexName="product" searchClient={searchClient}>
-			<SearchBox />
-			<Hits hitComponent={Hit} />
+			<SearchBox
+				placeholder="product, category, brand"
+				queryHook={(_, search) => {
+					searchRef.current = search
+				}}
+				onSubmit={(event) => {
+					if (searchRef.current) {
+						searchRef?.current(event.target.firstChild.value)
+					}
+				}}
+				submitIconComponent={() => (
+					<div className="ml-1 absolute left-0 top-1/2 -translate-y-1/2">
+						<Image src="/search.svg" width={15} height={15} alt="search icon" />
+					</div>
+				)}
+				resetIconComponent={() => (
+					<div className="absolute top-1/2 right-1  -translate-y-1/2 z-20">
+						<Image
+							src="/crossBlack.svg"
+							width={15}
+							height={15}
+							alt="cross icon"
+						/>
+					</div>
+				)}
+				classNames={{
+					input: 'ml-6 px-2 py-1 rounded-md bg-slate-200 focus:outline-none',
+					form: 'relative bg-slate-200 sm:inline-block rounded-md sm:mx-4 focus-within:border-blue-400 border-2',
+				}}
+			/>
+
+			<CustomHits escapeHTML={true} />
 		</InstantSearch>
 	)
 }
 
 const Hit = ({ hit }) => {
-	console.log(hit)
-
-	return <Highlight attribute="name" hit={hit} />
+	return <ProductCard key={hit.id} productDetails={{ ...hit }} />
 }
 
 function FilterAccordion({ setCat }: { setCat: (ids: [string]) => void }) {
@@ -70,42 +119,44 @@ const Home = () => {
 	// console.log(products.products.data)
 
 	const [ref, inView] = useInView()
-	const [categories, setCategories] = useState<[string]>([])
-	const { PRODUCTS } = queries
+	// const [categories, setCategories] = useState<[string]>([])
+	// const { PRODUCTS } = queries
 	// console.log(products.products)
 
-	const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery(
-		['products', categories],
-		async ({ pageParam = 0 }) => {
-			return await request(
-				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
-				PRODUCTS,
-				{
-					pagination: { start: pageParam, limit: LIMIT },
-					...(categories.length && {
-						filters: { and: { categories: { id: { in: categories } } } },
-					}),
-				}
-			)
-		},
-		{
-			getNextPageParam: (lastCount) => {
-				return lastCount.products.meta.pagination.page <
-					lastCount.products.meta.pagination.pageCount
-					? lastCount.products.meta.pagination.page *
-							lastCount.products.meta.pagination.pageSize
-					: undefined
-			},
-		}
-	)
+	// const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery(
+	// 	['products', categories],
+	// 	async ({ pageParam = 0 }) => {
+	// 		return await request(
+	// 			process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
+	// 			PRODUCTS,
+	// 			{
+	// 				pagination: { start: pageParam, limit: LIMIT },
+	// 				...(categories.length && {
+	// 					filters: { and: { categories: { id: { in: categories } } } },
+	// 				}),
+	// 			}
+	// 		)
+	// 	},
+	// 	{
+	// 		getNextPageParam: (lastCount) => {
+	// 			return lastCount.products.meta.pagination.page <
+	// 				lastCount.products.meta.pagination.pageCount
+	// 				? lastCount.products.meta.pagination.page *
+	// 						lastCount.products.meta.pagination.pageSize
+	// 				: undefined
+	// 		},
+	// 	}
+	// )
+	// console.log(data)
+
 	// console.log(inView)
 
-	useEffect(() => {
-		if (inView && hasNextPage) {
-			fetchNextPage()
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [inView])
+	// useEffect(() => {
+	// 	if (inView && hasNextPage) {
+	// 		fetchNextPage()
+	// 	}
+	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
+	// }, [inView])
 
 	return (
 		<>
@@ -116,10 +167,10 @@ const Home = () => {
 			</Head>
 
 			<Layout>
-				<FilterAccordion setCat={setCategories} />
+				{/* <FilterAccordion setCat={setCategories} /> */}
 				{/* <LayoutGroup> */}
-				<SearchBar />
-				<motion.ul
+				<Search />
+				{/* <motion.ul
 					className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
 					layoutScroll
 					// layout="position"
@@ -137,10 +188,10 @@ const Home = () => {
 								)
 							})}
 					</AnimatePresence>
-				</motion.ul>
+				</motion.ul> */}
 
 				{/* loading logic */}
-				{!isLoading && !hasNextPage && (
+				{/* {!isLoading && !hasNextPage && (
 					<motion.div
 						className="flex justify-center max-w-lg mx-auto bg-slate-200/60 p-5 m-5 text-slate-600/75 shadow-md rounded-md text-center"
 						initial={{ opacity: 0, scale: 0 }}
@@ -150,13 +201,13 @@ const Home = () => {
 					>
 						You've reached the end!
 					</motion.div>
-				)}
+				)} */}
 				{/* </LayoutGroup> */}
 
-				<div
+				{/* <div
 					className="h-1 bg-transparent"
 					ref={ref as RefObject<HTMLDivElement>}
-				></div>
+				></div> */}
 			</Layout>
 		</>
 	)
