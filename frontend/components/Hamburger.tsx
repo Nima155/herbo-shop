@@ -29,6 +29,7 @@ const MENU_TRANSITION = {
 		x: 0,
 	},
 }
+
 function HamburgerMenu() {
 	const { toggled, toggle } = useToggle()
 	// fixed z-10 inset-0 overflow-y-auto

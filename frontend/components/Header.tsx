@@ -1,19 +1,33 @@
-import React, { useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useState } from 'react'
 import Logo from '../public/Logo.svg'
 import Hamburger from './Hamburger'
 import Login from './Login'
 import useUser from '../lib/useUser'
 import queries from '../lib/graphql'
 import styled from 'styled-components'
-import { Popover, Transition } from '@headlessui/react'
+import { Menu, Popover, Transition } from '@headlessui/react'
 import { useMutation, useQueryClient } from 'react-query'
 import { authenticatedGraphQl } from '../lib/helpers'
 import Register from './Register'
 import Image from 'next/image'
 import { useShoppingCart } from 'use-shopping-cart'
-import Link from 'next/link'
+
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
+
+// eslint-disable-next-line react/display-name
+const MyLink = forwardRef((props: any, ref) => {
+	let { href, children, ...rest } = props
+	return (
+		<Link href={href}>
+			<a ref={ref} {...rest}>
+				{children}
+			</a>
+		</Link>
+	)
+})
+
 function CartButton() {
 	const { cartCount } = useShoppingCart()
 
@@ -150,27 +164,30 @@ export default function Header() {
 								>
 									<Popover.Panel className="absolute z-10 -left-6 sm:left-3 p-2 overflow-hidden rounded-md border shadow-md shadow-emerald-200 bg-slate-100">
 										<div className="flex flex-col gap-2 text-sm capitalize">
-											<Link
+											<Popover.Button
+												as={MyLink}
 												href="/current-account/update-profile"
 												passHref
 												scroll={false}
 											>
 												<StyledAnchor>Profile</StyledAnchor>
-											</Link>
-											<Link
+											</Popover.Button>
+											<Popover.Button
+												as={MyLink}
 												href="/current-account/address-details"
 												passHref
 												scroll={false}
 											>
 												<StyledAnchor>Shipping</StyledAnchor>
-											</Link>
-											<Link
+											</Popover.Button>
+											<Popover.Button
 												href="/current-account/orders"
 												passHref
 												scroll={false}
+												as={MyLink}
 											>
 												<StyledAnchor>Orders</StyledAnchor>
-											</Link>
+											</Popover.Button>
 											<button
 												className="self-start hover:text-emerald-600"
 												onClick={logoutMutation.mutate}

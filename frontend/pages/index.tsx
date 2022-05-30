@@ -1,6 +1,6 @@
 import type { GetServerSideProps } from 'next'
 import Head from 'next/head'
-import { dehydrate, QueryClient, useInfiniteQuery, useQuery } from 'react-query'
+import { dehydrate, QueryClient, useQuery } from 'react-query'
 import Layout from '../components/Layout'
 import Select from 'react-select'
 import queries from '../lib/graphql'
@@ -11,30 +11,61 @@ import { request } from 'graphql-request'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import Image from 'next/image'
 import {
-	useHits,
+	Configure,
 	InstantSearch,
+	RefinementList,
 	SearchBox,
-	UseHitsProps,
+	SortBy,
+	useInfiniteHits,
+	UseInfiniteHitsProps,
 } from 'react-instantsearch-hooks-web'
 import { instantMeiliSearch } from '@meilisearch/instant-meilisearch'
-import { useMemo, useRef } from 'react'
+import { RefObject, useEffect, useRef, useState } from 'react'
+import CustomSortBy from '../components/CustomSortBy'
 
 const searchClient = instantMeiliSearch('http://127.0.0.1:7700')
 
-const CustomHits = (props: UseHitsProps) => {
-	const { hits } = useHits(props)
+const CustomInfiniteHits = (props: UseInfiniteHitsProps) => {
+	const { hits, isLastPage, showMore } = useInfiniteHits(props)
+	const [ref, inView] = useInView()
+
+	useEffect(() => {
+		if (inView && !isLastPage) {
+			showMore()
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [inView])
+
 	return (
-		<motion.ul
-			className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
-			layoutScroll
-			// layout="position"
-		>
-			<AnimatePresence>
-				{hits.map((hit) => (
-					<Hit hit={hit} key={hit.id as string} />
-				))}
-			</AnimatePresence>
-		</motion.ul>
+		<LayoutGroup>
+			<motion.ul
+				className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
+				layoutScroll
+				// layout="position"
+			>
+				<AnimatePresence>
+					{hits.map((hit) => (
+						<Hit hit={hit} key={hit.id as string} />
+					))}
+				</AnimatePresence>
+			</motion.ul>
+			{!hits.length && (
+				<motion.div
+					className="flex justify-center max-w-lg mx-auto bg-slate-200/60 p-5 m-5 text-slate-600/75 shadow-md rounded-md text-center"
+					initial={{ opacity: 0, scale: 0 }}
+					whileInView={{ opacity: 1, scale: 1 }}
+					// viewport={{ once: true }}
+					layout="position"
+				>
+					Sorry, couldn&apos;t find what you are looking for!
+				</motion.div>
+			)}
+
+			<div
+				className="h-1 bg-transparent"
+				ref={ref as RefObject<HTMLDivElement>}
+			></div>
+		</LayoutGroup>
 	)
 }
 
@@ -44,38 +75,55 @@ function Search() {
 
 	return (
 		<InstantSearch indexName="product" searchClient={searchClient}>
-			<SearchBox
-				placeholder="product, category, brand"
-				queryHook={(_, search) => {
-					searchRef.current = search
-				}}
-				onSubmit={(event) => {
-					if (searchRef.current) {
-						searchRef?.current(event.target.firstChild.value)
-					}
-				}}
-				submitIconComponent={() => (
-					<div className="ml-1 absolute left-0 top-1/2 -translate-y-1/2">
-						<Image src="/search.svg" width={15} height={15} alt="search icon" />
-					</div>
-				)}
-				resetIconComponent={() => (
-					<div className="absolute top-1/2 right-1  -translate-y-1/2 z-20">
-						<Image
-							src="/crossBlack.svg"
-							width={15}
-							height={15}
-							alt="cross icon"
-						/>
-					</div>
-				)}
-				classNames={{
-					input: 'ml-6 px-2 py-1 rounded-md bg-slate-200 focus:outline-none',
-					form: 'relative bg-slate-200 sm:inline-block rounded-md sm:mx-4 focus-within:border-blue-400 border-2',
-				}}
-			/>
+			<Configure hitsPerPage={20} />
 
-			<CustomHits escapeHTML={true} />
+			{/* <RefinementList attribute="categories.name" /> */}
+
+			<div className="flex justify-between items-center pr-5">
+				<SearchBox
+					placeholder="product, category, brand"
+					queryHook={(_, search) => {
+						searchRef.current = search
+					}}
+					onSubmit={(event) => {
+						if (searchRef.current) {
+							searchRef?.current(event.target.firstChild.value)
+						}
+					}}
+					submitIconComponent={() => (
+						<div className="ml-1 absolute left-0 top-1/2 -translate-y-1/2">
+							<Image
+								src="/search.svg"
+								width={15}
+								height={15}
+								alt="search icon"
+							/>
+						</div>
+					)}
+					resetIconComponent={() => (
+						<div className="absolute top-1/2 right-1 -translate-y-1/2 z-20">
+							<Image
+								src="/crossBlack.svg"
+								width={15}
+								height={15}
+								alt="cross icon"
+							/>
+						</div>
+					)}
+					classNames={{
+						input: 'ml-6 px-2 py-1 rounded-md bg-slate-200 focus:outline-none',
+						form: 'relative bg-slate-200 sm:inline-block rounded-md sm:mx-4 max-w-sm focus-within:border-blue-400 border-2 shadow-sm',
+					}}
+				/>
+				<CustomSortBy
+					items={[
+						{ label: 'Price: High-Low', value: 'product:price:desc' },
+						{ label: 'Price: Low-High', value: 'product:price:asc' },
+					]}
+				/>
+				{/* TODO: correct the shite! */}
+			</div>
+			<CustomInfiniteHits escapeHTML={true} />
 		</InstantSearch>
 	)
 }
@@ -84,41 +132,10 @@ const Hit = ({ hit }) => {
 	return <ProductCard key={hit.id} productDetails={{ ...hit }} />
 }
 
-function FilterAccordion({ setCat }: { setCat: (ids: [string]) => void }) {
-	const { CATEGORIES } = queries
-	const { data } = useQuery(
-		'categories',
-		async () => {
-			const data_1 = request(
-				process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
-				CATEGORIES
-			)
-			return data_1
-		},
-		{ staleTime: 60 * 5 * 1000 }
-	)
-
-	return (
-		<div className="flex flex-col gap-1 sm:flex-row sm:px-4">
-			<Select
-				className="sm:w-80"
-				getOptionLabel={(option) => option.attributes.name}
-				getOptionValue={(option) => option.id}
-				options={data.categories.data}
-				isMulti
-				placeholder="Select Categories"
-				instanceId="tags"
-				onChange={(values) => setCat(values.map((tag) => tag.id) as [string])}
-			/>
-		</div>
-	)
-}
-
 const LIMIT = 6
 const Home = () => {
 	// console.log(products.products.data)
 
-	const [ref, inView] = useInView()
 	// const [categories, setCategories] = useState<[string]>([])
 	// const { PRODUCTS } = queries
 	// console.log(products.products)

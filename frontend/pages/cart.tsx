@@ -76,9 +76,14 @@ export default function Cart() {
 				</div>
 			</div>
 			{!cartCount && (
-				<h1 className="text-center w-full block text-xl">
+				<motion.h1
+					className="text-center w-full block text-xl"
+					transition={{ delay: 0.3 }}
+					initial={{ opacity: 0, x: -100 }}
+					animate={{ opacity: 1, x: 0 }}
+				>
 					You have no items in your cart
-				</h1>
+				</motion.h1>
 			)}
 		</Layout>
 	)
