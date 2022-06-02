@@ -45,3 +45,9 @@ export interface ProductAttributes {
 	}
 	id: string
 }
+
+export interface IModalToggle {
+	children?: (animation: any) => React.ReactNode
+
+	id: number
+}

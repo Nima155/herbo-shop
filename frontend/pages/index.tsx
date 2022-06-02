@@ -134,47 +134,6 @@ const Hit = ({ hit }) => {
 
 const LIMIT = 6
 const Home = () => {
-	// console.log(products.products.data)
-
-	// const [categories, setCategories] = useState<[string]>([])
-	// const { PRODUCTS } = queries
-	// console.log(products.products)
-
-	// const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery(
-	// 	['products', categories],
-	// 	async ({ pageParam = 0 }) => {
-	// 		return await request(
-	// 			process.env.NEXT_PUBLIC_BACKEND_URL_GRAPHQL!,
-	// 			PRODUCTS,
-	// 			{
-	// 				pagination: { start: pageParam, limit: LIMIT },
-	// 				...(categories.length && {
-	// 					filters: { and: { categories: { id: { in: categories } } } },
-	// 				}),
-	// 			}
-	// 		)
-	// 	},
-	// 	{
-	// 		getNextPageParam: (lastCount) => {
-	// 			return lastCount.products.meta.pagination.page <
-	// 				lastCount.products.meta.pagination.pageCount
-	// 				? lastCount.products.meta.pagination.page *
-	// 						lastCount.products.meta.pagination.pageSize
-	// 				: undefined
-	// 		},
-	// 	}
-	// )
-	// console.log(data)
-
-	// console.log(inView)
-
-	// useEffect(() => {
-	// 	if (inView && hasNextPage) {
-	// 		fetchNextPage()
-	// 	}
-	// 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	// }, [inView])
-
 	return (
 		<>
 			<Head>
@@ -184,47 +143,7 @@ const Home = () => {
 			</Head>
 
 			<Layout>
-				{/* <FilterAccordion setCat={setCategories} /> */}
-				{/* <LayoutGroup> */}
 				<Search />
-				{/* <motion.ul
-					className="grid gap-6 grid-cols-responsive-cols-md min-w-full justify-center mt-4"
-					layoutScroll
-					// layout="position"
-				>
-					<AnimatePresence>
-						{data?.pages
-							.map((e) => e.products.data)
-							.flat()
-							.map(({ attributes, id }: any) => {
-								return (
-									<ProductCard
-										key={id}
-										productDetails={{ id, ...attributes }}
-									/>
-								)
-							})}
-					</AnimatePresence>
-				</motion.ul> */}
-
-				{/* loading logic */}
-				{/* {!isLoading && !hasNextPage && (
-					<motion.div
-						className="flex justify-center max-w-lg mx-auto bg-slate-200/60 p-5 m-5 text-slate-600/75 shadow-md rounded-md text-center"
-						initial={{ opacity: 0, scale: 0 }}
-						whileInView={{ opacity: 1, scale: 1 }}
-						// viewport={{ once: true }}
-						layout="position"
-					>
-						You've reached the end!
-					</motion.div>
-				)} */}
-				{/* </LayoutGroup> */}
-
-				{/* <div
-					className="h-1 bg-transparent"
-					ref={ref as RefObject<HTMLDivElement>}
-				></div> */}
 			</Layout>
 		</>
 	)
