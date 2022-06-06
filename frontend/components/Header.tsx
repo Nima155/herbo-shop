@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from 'react'
+import React, { forwardRef, useEffect, useRef, useState } from 'react'
 import Logo from '../public/Logo.svg'
 import Hamburger, { useToggle } from './Hamburger'
 import Login from './Login'
@@ -9,13 +9,13 @@ import { Dialog, Menu, Popover, Transition } from '@headlessui/react'
 import { useMutation, useQueryClient } from 'react-query'
 import { authenticatedGraphQl } from '../lib/helpers'
 import Register from './Register'
-import Image from 'next/image'
 import { useShoppingCart } from 'use-shopping-cart'
-
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Path from './Path'
+import Button from './Button'
+import Image from 'next/image'
 
 const MAIN_MENU_TRANSITION = {
 	initial: {
@@ -131,6 +131,7 @@ export default function Header() {
 		}
 	)
 	const [hide, setHide] = useState(false)
+	const [hideScrollButton, setHideScrollButton] = useState(false)
 
 	useEffect(() => {
 		function handleScroll(event: Event) {
@@ -141,11 +142,10 @@ export default function Header() {
 
 		const interval = setInterval(() => {
 			if (didScroll) {
-				if (lastY < window.scrollY) {
-					setHide(true)
-				} else {
-					setHide(false)
-				}
+				setHide(lastY < window.scrollY)
+
+				setHideScrollButton(window.scrollY > 0)
+
 				lastY = window.scrollY
 
 				didScroll = false
@@ -160,11 +160,27 @@ export default function Header() {
 
 	return (
 		<>
+			{hideScrollButton && (
+				<Button
+					onClick={() => {
+						window.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+					}}
+					className="fixed bottom-6 right-6 z-50 rounded-full p-2 border bg-slate-200 border-slate-400"
+				>
+					<Image
+						src="/caret-top.svg"
+						height={25}
+						width={25}
+						alt={'go to the top'}
+					/>
+				</Button>
+			)}
 			<motion.header
 				className={`px-5 py-2 max-w-screen-xl -translate-x-1/2 left-1/2 fixed top-0 z-30 w-full bg-slate-100`}
 				animate={{ top: hide ? -300 : 0 }}
 			>
 				{/* <Modal modalActivator={() => {}}> */}
+
 				<HamburgerButton />
 				<Hamburger
 					variants={MENU_TRANSITION}

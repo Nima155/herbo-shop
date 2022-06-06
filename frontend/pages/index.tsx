@@ -1,8 +1,7 @@
 import type { GetServerSideProps } from 'next'
 import Head from 'next/head'
-import { dehydrate, QueryClient, useQuery } from 'react-query'
+import { dehydrate, QueryClient } from 'react-query'
 import Layout from '../components/Layout'
-import Select from 'react-select'
 import queries from '../lib/graphql'
 import { authenticatedGraphQl } from '../lib/helpers'
 import ProductCard from '../components/ProductCard'
@@ -13,9 +12,7 @@ import Image from 'next/image'
 import {
 	Configure,
 	InstantSearch,
-	RefinementList,
 	SearchBox,
-	SortBy,
 	useInfiniteHits,
 	UseInfiniteHitsProps,
 } from 'react-instantsearch-hooks-web'
@@ -69,6 +66,45 @@ const CustomInfiniteHits = (props: UseInfiniteHitsProps) => {
 	)
 }
 
+function CategoryMenu() {
+	const [isOpen, setIsOpen] = useState(false)
+	return (
+		<div className="hidden sm:flex flex-col">
+			<div className="flex">
+				<div className="border-b borer-slate-400 w-full mx-2" />
+				<motion.div
+					className="relative -bottom-3"
+					animate={{ rotate: isOpen ? 0 : 180, y: isOpen ? 3 : -3 }}
+					whileHover={{ y: 2 }}
+					transition={{ repeat: Infinity }}
+				>
+					<button
+						onClick={() => {
+							setIsOpen((e) => !e)
+						}}
+					>
+						<Image
+							src="/caret-top.svg"
+							width={50}
+							height={50}
+							alt="open menu"
+						/>
+					</button>
+				</motion.div>
+
+				<div className="border-b borer-slate-400 w-full mx-2" />
+			</div>
+			<motion.div
+				className="overflow-hidden"
+				layout
+				animate={{ height: isOpen ? 'auto' : 0 }}
+			>
+				<p>hi</p>
+			</motion.div>
+		</div>
+	)
+}
+
 function Search() {
 	const searchRef = useRef<null | ((_: string) => void)>(null)
 	// console.log('bye', searchRef)
@@ -79,7 +115,7 @@ function Search() {
 
 			{/* <RefinementList attribute="categories.name" /> */}
 
-			<div className="flex justify-between items-center pr-5">
+			<div className="flex justify-between items-center pr-5 mb-2">
 				<SearchBox
 					placeholder="product, category, brand"
 					queryHook={(_, search) => {
@@ -121,8 +157,9 @@ function Search() {
 						{ label: 'Price: Low-High', value: 'product:price:asc' },
 					]}
 				/>
-				{/* TODO: correct the shite! */}
 			</div>
+			<CategoryMenu />
+
 			<CustomInfiniteHits escapeHTML={true} />
 		</InstantSearch>
 	)

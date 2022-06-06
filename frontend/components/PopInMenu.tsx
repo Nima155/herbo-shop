@@ -4,20 +4,6 @@ import Link from 'next/link'
 import React, { useEffect } from 'react'
 import { useToggle } from './Hamburger'
 
-const MENU_TRANSITION = {
-	initial: {
-		opacity: 0,
-	},
-	animate: {
-		opacity: 1,
-
-		transition: {
-			delayChildren: 0.2,
-			staggerChildren: 0.1,
-		},
-	},
-}
-
 const ANCHOR_TRANSITION = {
 	initial: {
 		x: -20,

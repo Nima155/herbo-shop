@@ -51,3 +51,14 @@ export interface IModalToggle {
 
 	id: number
 }
+
+export type SortByItem = {
+	/**
+	 * The name of the index to target.
+	 */
+	value: string
+	/**
+	 * The label of the index to display.
+	 */
+	label: string
+}
